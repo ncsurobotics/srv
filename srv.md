@@ -11,7 +11,7 @@ the seawolf video router.
 1. [Goals]
 2. [Design]
    1. [Language Choice]
-       1 [Options]
+       1. [Options]
            1. [C]
            2. [C++]
            3. [Python]

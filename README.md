@@ -7,9 +7,13 @@ SRV is a rewrite and redesign of
 
 1.  [Goals](#goals)
 2.  [Design](#design)
-    1.  [Language Choice](#language-choice) 1 [Options](#options) 1.
-        [C](#c) 2. [C++](#c-1) 3. [Python](#python) 4. [Java](#java) 5.
-        [Scala](#scala)
+    1.  [Language Choice](#language-choice)
+        1.  [Options](#options)
+            1.  [C](#c)
+            2.  [C++](#c-1)
+            3.  [Python](#python)
+            4.  [Java](#java)
+            5.  [Scala](#scala)
         2.  [Decision](#decision)
 
 ## Goals
