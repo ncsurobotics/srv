@@ -5,11 +5,11 @@ SRV is a rewrite and redesign of
 
 ## Navigation
 
-[Goals](#goals)
-
-[Design](#design)
-
-[Language choice](#language-choice)
+1.  [Goals](#goals)
+2.  [Design](#design)
+    1.  [Language Choice](#language-choice)
+        1.  [Options](#options)
+        2.  [Decision](#decision)
 
 ## Goals
 
@@ -141,13 +141,13 @@ documentation.
 
 Java’s interpretation of object oriented programming is at times as
 rediculous as [pants oriented
-clothing.](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html).
+clothing.](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html)
 This leads Java to actually have what is in some cases a less advanced
 type system than C, and what is certainly a less advanced type system
-than C++. The reintroduction of null, something C++ introduced
-references and templates to avoid, and the removal of sum types, both
-result in NullReferenceExceptions that would actually be avoidable in C
-and C++.
+than C++. The reintroduction of null as a type system escape hatch,
+something C++ introduced references and templates to avoid, and the
+removal of sum types, both result in NullReferenceExceptions that would
+actually be avoidable in C and C++.
 
 On top of these annoyances, java is incredibly verbose. Compare hello
 world in Java
@@ -178,10 +178,11 @@ Scala is to Java as C++ is to C. Scala provides more flexible types and
 better gaurentees, while still being able to interoperate seamlessly
 with Java. As a JVM language, Scala gets all of the myriad benifits of
 Java: portability, the Gradle build system, a garbage collector, an
-[ide](https://www.jetbrains.com/idea/), and a [familiar documentation
+[ide](https://www.jetbrains.com/idea/), annotations processors, and a
+[familiar documentation
 style.](https://docs.scala-lang.org/style/scaladoc.html) What’s more,
-Scala cuts down on the verbosity of Java and removes the pants oriented
-clothing issue, helping users to define the problem in terms of itself
+Scala cuts down on the verbosity of Java and removes the *pants oriented
+clothing* issue, helping users to define the problem in terms of itself
 instead of in terms of objects.
 
 On a less technical side of things, Scala is [the second most paid
