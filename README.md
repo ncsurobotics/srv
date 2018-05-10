@@ -7,8 +7,9 @@ SRV is a rewrite and redesign of
 
 1.  [Goals](#goals)
 2.  [Design](#design)
-    1.  [Language Choice](#language-choice)
-        1.  [Options](#options)
+    1.  [Language Choice](#language-choice) 1 [Options](#options) 1.
+        [C](#c) 2. [C++](#c-1) 3. [Python](#python) 4. [Java](#java) 5.
+        [Scala](#scala)
         2.  [Decision](#decision)
 
 ## Goals
@@ -96,10 +97,12 @@ disadvantages grow apparent quickly. For instance, the lack of static
 types removes a basic sanity check one gets in other languages. It is
 easy to reason about and write a small python program, but a large,
 monolithic beast of a python program can be very hard to follow. Also,
-python makes it difficult to talk about low level details. Whereas in
-C++ and C it is easy to tell if something is a value, a pointer, or a
-reference, these distinctions are hidden from the user in python when
-one is using wrapper code for C functions.
+python makes it difficult to talk about low level details.
+
+Along with these organizational problems, there are technical ones too.
+Whereas in C++ and C it is easy to tell if something is a value, a
+pointer, or a reference, these distinctions are hidden from the user in
+python when one is using wrapper code for C functions.
 
 A perfect microcosm of python’s imperfections is python’s lack of [tail
 call elimination.](https://en.wikipedia.org/wiki/Tail_call) For
@@ -142,18 +145,18 @@ documentation.
 Java’s interpretation of object oriented programming is at times as
 rediculous as [pants oriented
 clothing.](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html)
-This leads Java to actually have what is in some cases a less advanced
-type system than C, and what is certainly a less advanced type system
-than C++. The reintroduction of null as a type system escape hatch,
-something C++ introduced references and templates to avoid, and the
-removal of sum types, both result in NullReferenceExceptions that would
-actually be avoidable in C and C++.
+This leads Java to have what is in some cases a less advanced type
+system than C, and what is certainly a less advanced type system than
+C++. The reintroduction of null as a type system escape hatch, something
+C++ introduced references and templates to avoid, and the removal of sum
+types, both result in NullReferenceExceptions that would actually be
+avoidable in C and C++.
 
 On top of these annoyances, java is incredibly verbose. Compare hello
 world in Java
 
 ``` java
-public class HelloWorld { 
+public class HelloWorld {
     public static void main(String[] args) {
         System.out.println("Hello world!");
     }
@@ -177,9 +180,9 @@ These failings, added together, make Java a frustrating language to use.
 Scala is to Java as C++ is to C. Scala provides more flexible types and
 better gaurentees, while still being able to interoperate seamlessly
 with Java. As a JVM language, Scala gets all of the myriad benifits of
-Java: portability, the Gradle build system, a garbage collector, an
-[ide](https://www.jetbrains.com/idea/), annotations processors, and a
-[familiar documentation
+Java: portability, the Gradle build system, a garbage collector, an [ide
+par excellece](https://www.jetbrains.com/idea/), annotations processors,
+and a [familiar documentation
 style.](https://docs.scala-lang.org/style/scaladoc.html) What’s more,
 Scala cuts down on the verbosity of Java and removes the *pants oriented
 clothing* issue, helping users to define the problem in terms of itself
@@ -195,9 +198,10 @@ making it an excellent addition to any programmer’s toolbox.
 While Scala keeps many of the advantages of Java, it does not keep one
 of the larger ones: the mindshare. For all its flaws, Java is the
 garbage collected Lingua Franca, being the major platform for Android
-and many other devices. Optimistically for Scala, it is just an improved
-Java, and the language won’t matter. Pessimistically, the lack of
-resources and familiarity would be a hinderance.
+and being available on Linux, Windows, and some other unixes.
+Optimistically for Scala, it is just an improved Java, and the language
+won’t matter. Pessimistically, the lack of resources and familiarity
+would be a hinderance.
 
 #### Decision
 
