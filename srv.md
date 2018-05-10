@@ -140,7 +140,10 @@ making it an excellent addition to any programmer's toolbox.
 
 ###### Disadvantages
 While Scala keeps many of the advantages of Java, it does not keep one of the larger ones:
-the mindshare. Scala lacks 
+the mindshare. For all its flaws, Java is the garbage collected Lingua Franca, being the major
+platform for Android and many other devices. Optimistically for Scala, it is just an improved
+Java, and the language won't matter. Pessimistically, the lack of resources and familiarity
+would be a hinderance.
 
 #### Decision
 Our primary need is a portable language, ruling out C and C++. Python is too high level, leaving Java and Scala.
