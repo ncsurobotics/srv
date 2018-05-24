@@ -12,8 +12,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+task makeReadme(type: Exec) {
+    commandLine 'pandoc', '-f', 'markdown', '-t', 'gfm', '-s', '-o', 'README.md', 'srv.md'
+}
+
 jar {
     manifest {
-        attributes 'Main-Class': 'srv'
+        attributes 'Main-Class': 'Srv'
     }
 }

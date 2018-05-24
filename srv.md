@@ -135,14 +135,23 @@ its extremely strict adherence to class-based object orientation,
 similarity to C, and QOL improvments over C and C++ such as a garbage
 collector all make Java an easy language to jump in to.
 But its mindshare is not its only advantage. Java also has a strict,
-strong, and polymorphic type system, a boatload of documentation,
+strong, and polymorphic type system, a module system,
+a boatload of documentation, 
 [annotation processors](https://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html)
-for dsls, [excellent](https://www.jetbrains.com/idea/) [tooling](https://junit.org/junit4/),
+for dsls, 
+[excellent](https://www.jetbrains.com/idea/) [tooling](https://junit.org/junit4/),
 and, most importantly to us, is available on every platform that hosts the JVM,
-which includes most of the unixes. Finally, Java has the excellent tool javadoc
+which includes most of the unixes. Finally, Java has the excellent tool Javadoc
 for generated documentation.
 
 ###### Disadvantages
+Java's largest technical disadvantage is its inability
+to interoperate with other languages. Whereas C code
+is easily wrapped by any scripting language,
+Java mostly limits itself to the JVM, ruling
+out the option of wrapping Java code with Python code.
+
+Apart from technical disadvantages, Java also has many language warts.
 Java's interpretation of object
 oriented programming is at times as rediculous as
 [pants oriented clothing.](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html)
@@ -153,7 +162,7 @@ escape hatch, something C++ introduced references and templates to
 avoid, and the removal of sum types, both result in NullReferenceExceptions
 that would actually be avoidable in C and C++.
 
-On top of these annoyances, java is incredibly verbose.
+On top of these annoyances, Java is incredibly verbose.
 Compare hello world in Java
 
 ```java
@@ -172,44 +181,14 @@ print("Hello world")
 
 if you need any evidence.
 
-These failings, added together, make Java a frustrating language to use.
-
-##### Scala
-
-###### Advantages
-Scala is to Java as C++ is to C. Scala provides more flexible
-types and better gaurentees, while still being able to interoperate seamlessly
-with Java. As a JVM language, Scala gets all of the myriad benifits of Java:
-portability, a unit testing system, a garbage collector, an
-[ide par excellece](https://www.jetbrains.com/idea/),
-annotations processors, and a
-[familiar documentation style.](https://docs.scala-lang.org/style/scaladoc.html)
-What's more, Scala cuts down on the verbosity of Java and removes the
-*pants oriented clothing* issue, helping users to define the problem
-in terms of itself instead of in terms of objects.
-
-On a less technical side of things, Scala is
-[the second most paid programming language](https://insights.stackoverflow.com/survey/2017#technology-top-paying-technologies-by-region),
-making it an excellent addition to any programmer's toolbox.
-
-###### Disadvantages
-While Scala keeps many of the advantages of Java, it does not keep one of the
-larger ones: the mindshare. For all its flaws, Java is the garbage collected
-Lingua Franca, being the major platform for Android and being available on
-Linux, Windows, and some other unixes. Optimistically for Scala,
-it is just an improved Java, and the language won't matter.
-Pessimistically, the lack of resources and familiarity
-would be a hindrance.
+These failings, added together, can make Java a frustrating language to use.
 
 #### Decision
 Our primary need is a portable language, ruling out C and C++.
-Python is too high level, leaving Java and Scala. Java and Scala are not
-mutually exclusive: they
-[interoperate well](http://www.codecommit.com/blog/java/interop-between-java-and-scala),
-as they are basically two sides of the same coin (the JVM).
-Because it is more modern, more forward-looking, and less painful to write,
-SRV leans towards Scala over Java, leaving the door open to switch between
-them.
+Python is too high level, leaving Java. Because we will only be
+using the program to serve simply formatted data, there
+should be no inter-platform friction, rendering Java
+an excellent choice.
 
 ### Build tool
 Using make, as SVR has done for its utilities,
@@ -220,34 +199,12 @@ and while CMake is theoretically platform-neutral, the complexity
 of compiling a mixed C and python library results in a platform
 specific build system (i.e. calling external processes and using bash).
 Luckily, there are alternatives, especially for anything written on the JVM.
-Scala and Java can use the platform-independent Gradle and SBT build systems.
-That being said, these build tools can call external commands, so we still must
+Scala and Java can use the platform-independent Gradle build system.
+That being said, build tools can call external commands, so we still must
 be careful. If we need to build, for instance, 
 python libraries, we should make sure to separate those libraries into their own
 packages, and build them with an appropriate build tool.
 Because we are using both Scala and Java, SBT has been chosen.
-
-### Wrapper
-Much like SVR, the SRV server runs in the background. However, unlike SVR,
-SRV is started via a wrapper, so that once the wrapper exits,
-the caller of the wrapper will know whether or not SRV has sucessfully
-started. For instance:
-
-```bash
-srv --start
-if [ "$?" = "0" ]
-then
-    echo "SRV has sucessfully started"
-else
-    echo "SRV failed to start"
-fi
-```
-
-The wrapper also assists in other operations,
-such as killing the server, getting information about how to
-run the server, and checking whether the server is up.
-The wrapper is written in Java.
-
 
 ### Client
 The goal of the client is to provide an interface for
@@ -266,88 +223,3 @@ Therefore, the server takes requests related
 to serving video streams.
 
 ### Server Protocol
-SRV uses two basic protocols: UDP for
-broadcasting and routing video streams, and
-TCP for requests. TCP requests will be sent
-by the wrapper to the server. For instance,
-the wrapper may ask the server to open a stream.
-
-UDP will be used to broadcast video streams
-to all the client. The UDP packets will
-be very simple: they start with one byte that
-serves as a relative time stamp, then have one byte
-that determines which stream it is, then the stream.
-
-The byte that serves as a relative time stamp will
-be a number, 0-255, that determines what relative
-position in the stream an image is. For instance, the
-first image sent by the SRV server will be numbered
-0, then the next one will be 1, all the way up to 255.
-After 255, the next number is 0.
-
-The byte that determines which stream it is will be
-a number, 0-255, which serves as the id of the stream.
-The id will be passed to the server by the wrapper. The
-id will also be associated with a string, which is passed
-to the server by the wrapper. The server will then hold
-that id. The ids then can be queried through the wrapper
-process.
-
-
-SRV uses the UDP network protocol.
-Most of the protocol can be broken up into
-two catagories: requests to open a source,
-and requests centered on the stream of frames
-from the source. 
-
-+--------------+--------------+--------------+--------------+
-| Name         | Type         | Description  | Low level    |
-|              |              |              | Desciption   |
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-+--------------+--------------+--------------+--------------+
-| Alive        | TCP          | A peice of   | 1            |
-|              |              | data sent    |              |
-|              |              | by the SRV   |              |
-|              |              | server when  |              |
-|              |              | it is        |              |
-|              |              | initialized  |              |
-+--------------+--------------+--------------+--------------+
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-|              |              |              |              |
-+--------------+--------------+--------------+--------------+
-
-
-+------------------+------------------+------------------+------------------+
-| Name             | Description      | Request          | Response         |
-+==================+==================+==================+==================+
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-+------------------+------------------+------------------+------------------+
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-+------------------+------------------+------------------+------------------+
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-|                  |                  |                  |                  |
-+------------------+------------------+------------------+------------------+
-
-
-
