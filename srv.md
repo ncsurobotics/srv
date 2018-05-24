@@ -18,19 +18,27 @@ the seawolf video router.
            4. [Java]
            5. [Scala]
        2. [Decision]
+   2. [Build Tool]
+   3. [Client]
+   4. [Server]
+   5. [Sources]
+   6. [Server Protocol]
 
 ## Goals
 Along with SVR's goals of providing a server and client for realtime passing
 of video streams between applications, SRV aims to be well documented,
 correctly implemented, and platform independent. Furtherore, SRV aims to be
-a more updated version of SVR, using the `OpenCV 2` library over `OpenCV`.
+a more updated version of SVR, using the `OpenCV 3` library over `OpenCV 2`.
+Finally, SRV will drop SVR's responsibility of reading from input streams.
+Instead of reading video streams from video devices, SRV will simply
+route packets passed to it. An external program will be needed to read
+from the raw video sources and pass them to the router.
 
 ## Design
 In order to meet these goals, SRV has made a few design changes to SVR.
 Major design changes include using Java and Scala over C for portability,
-using Gradle over Make and CMake for the build tool, and providing
-a wrapper process that yeilds when the server has started to
-simplify scripts that depend on the server.
+using a JVM based build tool over Make and CMake for the build tool,
+and 
 
 ### Language Choice
 
@@ -39,11 +47,11 @@ The options with which creating SRV would be feasible include any
 language that openCV bindings are available for.
 
 ##### C
-C is a tried and true language, and, with python,
-forms most of the current code on the robot.
 
 ###### Advantages
-C's advantages include being able to talk naturally about low level details,
+C is a tried and true language, and, with python,
+forms most of the current code on the robot. C's advantages include being able 
+to talk naturally about low level details,
 a single, simple way to code. Furthermore, C is
 [easily wrapped by python,](http://swig.org/) and it is
 [taught in the courses CSC 116 and 216 at NCSU.](https://www.acs.ncsu.edu/php/coursecat/directory.php)
@@ -54,6 +62,10 @@ large. C also has a weak type system and a lot of undefined behavior,
 which seems anachronistic compared to other languages, which can gaurentee more.
 But the biggest problem we have encountered with C isn't the weak type system,
 the undefined behavior, or the lack of abstraction, but the platform-dependance.
+Whats worse, C's [ "stringly typed"](http://wiki.c2.com/?StringlyTyped) macro
+system, with its `#include`s and `#define`s, results in unresolvable
+naming conficts, even on supported systems. With name shadowing and modules, 
+modern languages apart from C have fixed this problem.
 While we endeavor to support *any* unix system, the number
 of systems that are de facto supported has dwindled from the original list
 of Mac, Linux, and BSD to just Ubuntu.
@@ -125,7 +137,7 @@ collector all make Java an easy language to jump in to.
 But its mindshare is not its only advantage. Java also has a strict,
 strong, and polymorphic type system, a boatload of documentation,
 [annotation processors](https://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html)
-for dsls, [excellent](https://www.jetbrains.com/idea/) [tooling](https://gradle.org/),
+for dsls, [excellent](https://www.jetbrains.com/idea/) [tooling](https://junit.org/junit4/),
 and, most importantly to us, is available on every platform that hosts the JVM,
 which includes most of the unixes. Finally, Java has the excellent tool javadoc
 for generated documentation.
@@ -168,7 +180,7 @@ These failings, added together, make Java a frustrating language to use.
 Scala is to Java as C++ is to C. Scala provides more flexible
 types and better gaurentees, while still being able to interoperate seamlessly
 with Java. As a JVM language, Scala gets all of the myriad benifits of Java:
-portability, the Gradle build system, a garbage collector, an
+portability, a unit testing system, a garbage collector, an
 [ide par excellece](https://www.jetbrains.com/idea/),
 annotations processors, and a
 [familiar documentation style.](https://docs.scala-lang.org/style/scaladoc.html)
@@ -187,7 +199,7 @@ Lingua Franca, being the major platform for Android and being available on
 Linux, Windows, and some other unixes. Optimistically for Scala,
 it is just an improved Java, and the language won't matter.
 Pessimistically, the lack of resources and familiarity
-would be a hinderance.
+would be a hindrance.
 
 #### Decision
 Our primary need is a portable language, ruling out C and C++.
@@ -196,5 +208,146 @@ mutually exclusive: they
 [interoperate well](http://www.codecommit.com/blog/java/interop-between-java-and-scala),
 as they are basically two sides of the same coin (the JVM).
 Because it is more modern, more forward-looking, and less painful to write,
-SRV will lean towards Scala over Java, leaving the door open to switch between
+SRV leans towards Scala over Java, leaving the door open to switch between
 them.
+
+### Build tool
+Using make, as SVR has done for its utilities,
+has caused problems in the past. Although make is common to all
+unixes, make runs external processes that may not be. While make can and
+[has been replaced with CMake](https://github.com/jsalzbergedu/svr),
+and while CMake is theoretically platform-neutral, the complexity
+of compiling a mixed C and python library results in a platform
+specific build system (i.e. calling external processes and using bash).
+Luckily, there are alternatives, especially for anything written on the JVM.
+Scala and Java can use the platform-independent Gradle and SBT build systems.
+That being said, these build tools can call external commands, so we still must
+be careful. If we need to build, for instance, 
+python libraries, we should make sure to separate those libraries into their own
+packages, and build them with an appropriate build tool.
+Because we are using both Scala and Java, SBT has been chosen.
+
+### Wrapper
+Much like SVR, the SRV server runs in the background. However, unlike SVR,
+SRV is started via a wrapper, so that once the wrapper exits,
+the caller of the wrapper will know whether or not SRV has sucessfully
+started. For instance:
+
+```bash
+srv --start
+if [ "$?" = "0" ]
+then
+    echo "SRV has sucessfully started"
+else
+    echo "SRV failed to start"
+fi
+```
+
+The wrapper also assists in other operations,
+such as killing the server, getting information about how to
+run the server, and checking whether the server is up.
+The wrapper is written in Java.
+
+
+### Client
+The goal of the client is to provide an interface for
+accessing video streams served by the server.
+Because the client is interface-centric,
+the relevant information can be found under
+[Server Protocol].
+
+### Server
+The goal of the server is to serve video streams.
+It takes these streams from raw sources,
+like video cameras, and break them up into
+frames, which can be accessed individually
+by the client.
+Therefore, the server takes requests related
+to serving video streams.
+
+### Server Protocol
+SRV uses two basic protocols: UDP for
+broadcasting and routing video streams, and
+TCP for requests. TCP requests will be sent
+by the wrapper to the server. For instance,
+the wrapper may ask the server to open a stream.
+
+UDP will be used to broadcast video streams
+to all the client. The UDP packets will
+be very simple: they start with one byte that
+serves as a relative time stamp, then have one byte
+that determines which stream it is, then the stream.
+
+The byte that serves as a relative time stamp will
+be a number, 0-255, that determines what relative
+position in the stream an image is. For instance, the
+first image sent by the SRV server will be numbered
+0, then the next one will be 1, all the way up to 255.
+After 255, the next number is 0.
+
+The byte that determines which stream it is will be
+a number, 0-255, which serves as the id of the stream.
+The id will be passed to the server by the wrapper. The
+id will also be associated with a string, which is passed
+to the server by the wrapper. The server will then hold
+that id. The ids then can be queried through the wrapper
+process.
+
+
+SRV uses the UDP network protocol.
+Most of the protocol can be broken up into
+two catagories: requests to open a source,
+and requests centered on the stream of frames
+from the source. 
+
++--------------+--------------+--------------+--------------+
+| Name         | Type         | Description  | Low level    |
+|              |              |              | Desciption   |
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
++--------------+--------------+--------------+--------------+
+| Alive        | TCP          | A peice of   | 1            |
+|              |              | data sent    |              |
+|              |              | by the SRV   |              |
+|              |              | server when  |              |
+|              |              | it is        |              |
+|              |              | initialized  |              |
++--------------+--------------+--------------+--------------+
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
+|              |              |              |              |
++--------------+--------------+--------------+--------------+
+
+
++------------------+------------------+------------------+------------------+
+| Name             | Description      | Request          | Response         |
++==================+==================+==================+==================+
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
++------------------+------------------+------------------+------------------+
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
++------------------+------------------+------------------+------------------+
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
+|                  |                  |                  |                  |
++------------------+------------------+------------------+------------------+
+
+
+

@@ -28,9 +28,9 @@ library over `OpenCV`.
 
 In order to meet these goals, SRV has made a few design changes to SVR.
 Major design changes include using Java and Scala over C for
-portability, using Gradle over Make and CMake for the build tool, and
-providing a wrapper process that yeilds when the server has started to
-simplify scripts that depend on the server.
+portability, using a JVM based build tool over Make and CMake for the
+build tool, and providing a wrapper process that yeilds when the server
+has started to simplify scripts that depend on the server.
 
 ### Language Choice
 
@@ -139,7 +139,7 @@ advantage. Java also has a strict, strong, and polymorphic type system,
 a boatload of documentation, [annotation
 processors](https://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html)
 for dsls, [excellent](https://www.jetbrains.com/idea/)
-[tooling](https://gradle.org/), and, most importantly to us, is
+[tooling](https://junit.org/junit4/), and, most importantly to us, is
 available on every platform that hosts the JVM, which includes most of
 the unixes. Finally, Java has the excellent tool javadoc for generated
 documentation.
@@ -184,7 +184,7 @@ These failings, added together, make Java a frustrating language to use.
 Scala is to Java as C++ is to C. Scala provides more flexible types and
 better gaurentees, while still being able to interoperate seamlessly
 with Java. As a JVM language, Scala gets all of the myriad benifits of
-Java: portability, the Gradle build system, a garbage collector, an [ide
+Java: portability, a unit testing system, a garbage collector, an [ide
 par excellece](https://www.jetbrains.com/idea/), annotations processors,
 and a [familiar documentation
 style.](https://docs.scala-lang.org/style/scaladoc.html) What’s more,
