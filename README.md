@@ -13,12 +13,11 @@ SRV is a rewrite and redesign of
             2.  [C++](#c-1)
             3.  [Python](#python)
             4.  [Java](#java)
-            5.  \[Scala\]
         2.  [Decision](#decision)
     2.  [Build Tool](#build-tool)
     3.  [Client](#client)
     4.  [Server](#server)
-    5.  \[Sources\]
+    5.  [Sources](#sources)
     6.  [Server Protocol](#server-protocol)
 
 ## Goals
@@ -233,5 +232,7 @@ The goal of the server is to serve video streams. It takes these streams
 from raw sources, like video cameras, and break them up into frames,
 which can be accessed individually by the client. Therefore, the server
 takes requests related to serving video streams.
+
+### Sources
 
 ### Server Protocol

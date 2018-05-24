@@ -16,7 +16,6 @@ the seawolf video router.
            2. [C++]
            3. [Python]
            4. [Java]
-           5. [Scala]
        2. [Decision]
    2. [Build Tool]
    3. [Client]
@@ -221,5 +220,7 @@ frames, which can be accessed individually
 by the client.
 Therefore, the server takes requests related
 to serving video streams.
+
+### Sources
 
 ### Server Protocol
