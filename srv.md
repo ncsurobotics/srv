@@ -135,14 +135,23 @@ its extremely strict adherence to class-based object orientation,
 similarity to C, and QOL improvments over C and C++ such as a garbage
 collector all make Java an easy language to jump in to.
 But its mindshare is not its only advantage. Java also has a strict,
-strong, and polymorphic type system, a boatload of documentation,
+strong, and polymorphic type system, a module system,
+a boatload of documentation, 
 [annotation processors](https://docs.oracle.com/javase/7/docs/api/javax/annotation/processing/Processor.html)
-for dsls, [excellent](https://www.jetbrains.com/idea/) [tooling](https://junit.org/junit4/),
+for dsls, 
+[excellent](https://www.jetbrains.com/idea/) [tooling](https://junit.org/junit4/),
 and, most importantly to us, is available on every platform that hosts the JVM,
-which includes most of the unixes. Finally, Java has the excellent tool javadoc
+which includes most of the unixes. Finally, Java has the excellent tool Javadoc
 for generated documentation.
 
 ###### Disadvantages
+Java's largest technical disadvantage is its inability
+to interoperate with other languages. Whereas C code
+is easily wrapped by any scripting language,
+Java mostly limits itself to the JVM, ruling
+out the option of wrapping Java code with Python code.
+
+Apart from technical disadvantages, Java also has many language warts.
 Java's interpretation of object
 oriented programming is at times as rediculous as
 [pants oriented clothing.](https://steve-yegge.blogspot.com/2006/03/execution-in-kingdom-of-nouns.html)
@@ -153,7 +162,7 @@ escape hatch, something C++ introduced references and templates to
 avoid, and the removal of sum types, both result in NullReferenceExceptions
 that would actually be avoidable in C and C++.
 
-On top of these annoyances, java is incredibly verbose.
+On top of these annoyances, Java is incredibly verbose.
 Compare hello world in Java
 
 ```java
@@ -172,44 +181,14 @@ print("Hello world")
 
 if you need any evidence.
 
-These failings, added together, make Java a frustrating language to use.
-
-##### Scala
-
-###### Advantages
-Scala is to Java as C++ is to C. Scala provides more flexible
-types and better gaurentees, while still being able to interoperate seamlessly
-with Java. As a JVM language, Scala gets all of the myriad benifits of Java:
-portability, a unit testing system, a garbage collector, an
-[ide par excellece](https://www.jetbrains.com/idea/),
-annotations processors, and a
-[familiar documentation style.](https://docs.scala-lang.org/style/scaladoc.html)
-What's more, Scala cuts down on the verbosity of Java and removes the
-*pants oriented clothing* issue, helping users to define the problem
-in terms of itself instead of in terms of objects.
-
-On a less technical side of things, Scala is
-[the second most paid programming language](https://insights.stackoverflow.com/survey/2017#technology-top-paying-technologies-by-region),
-making it an excellent addition to any programmer's toolbox.
-
-###### Disadvantages
-While Scala keeps many of the advantages of Java, it does not keep one of the
-larger ones: the mindshare. For all its flaws, Java is the garbage collected
-Lingua Franca, being the major platform for Android and being available on
-Linux, Windows, and some other unixes. Optimistically for Scala,
-it is just an improved Java, and the language won't matter.
-Pessimistically, the lack of resources and familiarity
-would be a hindrance.
+These failings, added together, can make Java a frustrating language to use.
 
 #### Decision
 Our primary need is a portable language, ruling out C and C++.
-Python is too high level, leaving Java and Scala. Java and Scala are not
-mutually exclusive: they
-[interoperate well](http://www.codecommit.com/blog/java/interop-between-java-and-scala),
-as they are basically two sides of the same coin (the JVM).
-Because it is more modern, more forward-looking, and less painful to write,
-SRV leans towards Scala over Java, leaving the door open to switch between
-them.
+Python is too high level, leaving Java. Because we will only be
+using the program to serve simply formatted data, there
+should be no inter-platform friction, rendering Java
+an excellent choice.
 
 ### Build tool
 Using make, as SVR has done for its utilities,
