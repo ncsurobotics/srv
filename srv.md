@@ -16,7 +16,6 @@ the seawolf video router.
            2. [C++]
            3. [Python]
            4. [Java]
-           5. [Scala]
        2. [Decision]
    2. [Build Tool]
    3. [Client]
