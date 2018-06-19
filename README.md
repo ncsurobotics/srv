@@ -17,9 +17,8 @@ SRV is a rewrite and redesign of
     2.  [Build Tool](#build-tool)
     3.  [Client](#client)
     4.  [Server](#server)
-    5.  \[Sources\]
-    6.  [Server Protocol](#server-protocol)
-    7.  [Timeline](#timeline)
+    5.  [Server Protocol](#server-protocol)
+    6.  [Timeline](#timeline)
 
 ## Goals
 

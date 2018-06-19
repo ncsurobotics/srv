@@ -20,9 +20,8 @@ the seawolf video router.
    2. [Build Tool]
    3. [Client]
    4. [Server]
-   5. [Sources]
-   6. [Server Protocol]
-   7. [Timeline]
+   5. [Server Protocol]
+   6. [Timeline]
 
 ## Goals
 Along with SVR's goals of providing a server and client for realtime passing
