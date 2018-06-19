@@ -21,8 +21,8 @@ the seawolf video router.
    3. [Client]
    4. [Server]
    5. [Server Protocol]
-   6. [Timeline]
-   7. [Footnotes]
+3. [Timeline]
+4. [Footnotes]
 
 ## Goals
 Along with SVR's goals of providing a server and client for realtime passing
@@ -458,7 +458,7 @@ that id, keeping it associated with the name.
 The ids then can be queried through the wrapper
 process.
 
-# Timeline
+## Timeline
 
 +---------------+---------------+---------------+
 | Feature       | Completed     | Expected      |
@@ -497,6 +497,6 @@ process.
 |               |               |               |
 +---------------+---------------+---------------+
 
-# Footnotes
+## Footnotes
 
 [^1]: Spelling intentional.
