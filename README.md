@@ -332,8 +332,20 @@ JSON object.
 
 Mock JSON object example:
 
-`javascript { "sources": [ { "id": 1, "name": "sourcename" }, { "id": 2,
-"name": "othersourcename" } ] }`
+``` javascript
+{
+  "sources": [
+    {
+      "id": 1,
+      "name": "sourcename"
+    },
+    {
+      "id": 2,
+      "name": "othersourcename"
+    }
+  ]
+}
+```
 
 The source state will consist of a 256 entry-long associative array. The
 array entries will consist of two fields: an id and a name. The server
