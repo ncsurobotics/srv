@@ -401,7 +401,7 @@ name, which is passed to the server by the wrapper. The server will then
 hold that id, keeping it associated with the name. The ids then can be
 queried through the wrapper process.
 
-## Timeline
+# Timeline
 
 | Feature                   | Completed | Expected Date |
 | ------------------------- | --------- | ------------- |
@@ -412,6 +412,6 @@ queried through the wrapper process.
 | Numpy array to udp script | No        | 08/05/18      |
 | Python Wrapper Code       | No        | 08/12/18      |
 
-## Footnotes
+# Footnotes
 
 1.  Spelling intentional.

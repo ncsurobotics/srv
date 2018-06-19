@@ -458,7 +458,7 @@ that id, keeping it associated with the name.
 The ids then can be queried through the wrapper
 process.
 
-## Timeline
+# Timeline
 
 +---------------+---------------+---------------+
 | Feature       | Completed     | Expected      |
@@ -497,6 +497,6 @@ process.
 |               |               |               |
 +---------------+---------------+---------------+
 
-## Footnotes
+# Footnotes
 
 [^1]: Spelling intentional.
