@@ -22,6 +22,7 @@ the seawolf video router.
    4. [Server]
    5. [Sources]
    6. [Server Protocol]
+   7. [Timeline]
 
 ## Goals
 Along with SVR's goals of providing a server and client for realtime passing
@@ -35,7 +36,7 @@ from the raw video sources and pass them to the router.
 
 ## Design
 In order to meet these goals, SRV has made a few design changes to SVR.
-Major design changes include using Java and Scala over C for portability,
+Major design changes include using Java over C for portability,
 using a JVM based build tool over Make and CMake for the build tool,
 and 
 
@@ -149,6 +150,29 @@ to interoperate with other languages. Whereas C code
 is easily wrapped by any scripting language,
 Java mostly limits itself to the JVM, ruling
 out the option of wrapping Java code with Python code.
+In the distant future, [Graalvm](http://www.graalvm.org/)
+may fix this problem, but for now, Java is isolated to the JVM.
+
+Java is also a dull tool when it comes to expressing classes
+of objects that must have both extensible behavior and structure,
+leading to inflexible APIs.
+While it is easy to add behavior to a fixed set of structures
+via the 
+[visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern),
+or to add a new structure with a fixed set of behaviors via 
+[inheritance](https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)),
+without [open multimethods](https://en.wikipedia.org/wiki/Multiple_dispatch) or
+[typeclasses](https://en.wikipedia.org/wiki/Type_class),
+it is difficult
+[but not impossible](https://oleksandrmanzyuk.wordpress.com/2014/06/18/from-object-algebras-to-finally-tagless-interpreters-2/)
+to make extensible types that can have both new operations and new types added.
+This problem is especially salient in type heirarchies where the
+[object algebra approach](https://oleksandrmanzyuk.wordpress.com/2014/06/18/from-object-algebras-to-finally-tagless-interpreters-2/)
+does not work.
+
+Luckily, [through code generation,](http://www.multij.org/)
+open multimethods can be emulated. It is not a part of standard Java,
+and it doesn't play nicely with generics, but it is better than nothing.
 
 Apart from technical disadvantages, Java also has many language warts.
 Java's interpretation of object
@@ -184,7 +208,7 @@ These failings, added together, can make Java a frustrating language to use.
 
 #### Decision
 Our primary need is a portable language, ruling out C and C++.
-Python is too high level, leaving Java. Because we will only be
+Python is too high level and dynamic, leaving Java. Because we will only be
 using the program to serve simply formatted data, there
 should be no inter-platform friction, rendering Java
 an excellent choice.
@@ -198,12 +222,43 @@ and while CMake is theoretically platform-neutral, the complexity
 of compiling a mixed C and python library results in a platform
 specific build system (i.e. calling external processes and using bash).
 Luckily, there are alternatives, especially for anything written on the JVM.
-Scala and Java can use the platform-independent Gradle build system.
-That being said, build tools can call external commands, so we still must
+Java projects can use the platform-independent Gradle build system.
+That being said, Gradle can still call external commands, so we still must
 be careful. If we need to build, for instance, 
 python libraries, we should make sure to separate those libraries into their own
 packages, and build them with an appropriate build tool.
-Because we are using both Scala and Java, SBT has been chosen.
+
+### Wrapper
+Much like SVR, the SRV server runs in the background. However, unlike SVR,
+SRV is started via a wrapper, so that once the wrapper exits,
+the caller of the wrapper will know whether or not SRV has sucessfully
+started. For instance:
+
+```bash
+srv --request LifecycleGet
+if [ "$?" = "0" ]
+then
+    echo "SRV server already started."
+else
+    echo "Starting SRV server"
+    srv start
+    if [ "$?" = "0" ]
+    then
+        echo "SRV has sucessfully started"
+        echo "Initializing server"
+        srv --request LifecycleStart
+        echo "Server initialized."
+    else
+        echo "SRV failed to start"
+    fi
+fi
+```
+
+The actual logic, however, will be in a python wrapper
+to the wrapper executable, `srv`. The library will transparently start
+the server if it is not up, pushing the server lifecycle
+out of sight and out of mind.
+
 
 ### Client
 The goal of the client is to provide an interface for
@@ -221,6 +276,224 @@ by the client.
 Therefore, the server takes requests related
 to serving video streams.
 
-### Sources
+#### Server State
+The server's state is exposed to the wrapper
+and can be edited via the wrapper.
+
+#####  Lifecycle
+Lifecycle is the category of the server's
+state concerning what stage the server is in.
+
+The `Lifecycle` family of requests
+can be used to look into and alter the state of the Lifecycle.
+
+
+###### Lifecycle States
+
+The server state will be one of Uninitialized, Initialized, or Killed,
+and Users.
+
++---------------+------------------+
+| Name          | Description      |
++===============+==================+
+| Uninitialized | The server       |
+|               | has been         |
+|               | started but      |
+|               | not              |
+|               | initialized.     |
++---------------+------------------+
+| Initialized   | The server       |
+|               | has been         |
+|               | initialized      |
+|               | and is           |
+|               | ready to use.    |
++---------------+------------------+
+| Killed        | The server       |
+|               | is in the        |
+|               | process of       |
+|               | shutting         |
+|               | down.            |
++---------------+------------------+
+| Users         | The number of    |
+|               | users the server |
+|               | has. Should be   |
+|               | increased by one |
+|               | by a client when |
+|               | it is added, and |
+|               | decreased by one |
+|               | when that client |
+|               | is done.         |
++---------------+------------------+
+
+
+##### Source
+Source is the category of the server's state
+concerning opening and closing sources.
+
+The `Source` category of requests
+can be used to look into and alter
+the sources.
+
+###### Source State
+
+Sorces are UDP sockets that the server routes.
+Sources are given a name and a number id.
+There can be up to 256 sources open at a time.
+The server keeps an associative list (hash table)
+of a number (stored as a byte) plus a name
+(stored as a string). This list can be accessed
+through the wrapper using the `SourceList` request,
+which will return a JSON object.
+
+Mock JSON object example:
+
+```javascript
+{
+  "sources": [
+    {
+      "id": 1,
+      "name": "sourcename"
+    },
+    {
+      "id": 2,
+      "name": "othersourcename"
+    }
+  ]
+}```
+
+The source state will consist of a 256 entry-long
+associative array. The array entries will consist
+of two fields: an id and a name.
+The server will always open a source
+at the lowest possible id number, and when a source is killed,
+free that number for re-use.
+
 
 ### Server Protocol
+SRV uses two basic protocols: UDP for
+broadcasting and routing video streams, and
+TCP for requests and responses. 
+
+#### TCP Requests and Responses
+TCP requests will be used to change and inspect
+the server's state.
+For instance,
+the wrapper may ask the server to open a stream.
+
+##### Requests 
+
++------------------+------------------+------------------+
+| Name             | Description      | Response         |
++==================+==================+==================+
+| LifecycleGet     | Get the current  | LifecycleState   |
+|                  | state of the     |                  |
+|                  | lifecycle.       |                  |
+|                  |                  |                  |
+|                  |                  |                  |
+|                  |                  |                  |
++------------------+------------------+------------------+
+| LifecycleStart   | Start allocating | LifecycleStarted |
+|                  | resources.       |                  |
+|                  | Transition the   |                  |
+|                  | server from      |                  |
+|                  | uninitialized    |                  |
+|                  | to initialized.  |                  |
++------------------+------------------+------------------+
+| LifecycleKill    | Kill the server  | None             |
+|                  |                  |                  |
+|                  |                  |                  |
+|                  |                  |                  |
+|                  |                  |                  |
+|                  |                  |                  |
++------------------+------------------+------------------+
+
+
+##### Responses
+
++------------------+------------------+
+| Name             | Description      |
++==================+==================+
+| LifecycleState   | The state of     |
+|                  | the lifecycle    |
+|                  | as a JSON        |
+|                  | object.          |
+|                  |                  |
+|                  |                  |
++------------------+------------------+
+| LifecycleStarted | A JSON object    |
+|                  | containing       |
+|                  | a "error" field  |
+|                  | that is True     |
+|                  | when there       |
+|                  | was an error,    |
++------------------+------------------+
+
+#### UDP Data Routing
+
+UDP will be used to broadcast video streams
+to all the client. The UDP packets will
+be very simple: Firstly, 
+they will be based on [capn proto](https://capnproto.org/)
+for (de)cerealization[^1].
+The packets start with one byte that
+serves as a relative time stamp, then have one byte
+that determines which stream it is, then have
+a byte signalling if the source has been closed,
+then the image data.
+
+The byte that serves as a relative time stamp will
+be a number, 0-255, that determines what relative
+position in the stream an image is. For instance, the
+first image sent by the SRV server will be numbered
+0, then the next one will be 1, all the way up to 255.
+After 255, the next number is 0.
+
+The byte that determines which stream it is will be
+a number, 0-255, which serves as the id of the stream.
+The id will be passed to the server by the wrapper. The
+id will also be associated with a string name, which is passed
+to the server by the wrapper. The server will then hold
+that id, keeping it associated with the name.
+The ids then can be queried through the wrapper
+process.
+
+## Timeline
+
++---------------+---------------+---------------+
+| Feature       | Completed     | Expected      |
+|               |               | Date          |
+|               |               |               |
+|               |               |               |
++===============+===============+===============+
+| SrvRequests   | Yes           | N/A           |
+|               |               |               |
+|               |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+| SrvResponses  | No            | 07/01/18      |
+|               |               |               |
+|               |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+| SrvWrapper    | No            | 06/24/18      |
+|               |               |               |
+|               |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+| Srv (server)  | No            | 07/29/18      |
+|               |               |               |
+|               |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+| Numpy array   | No            | 08/05/18      |
+| to udp        |               |               |
+| script        |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+| Python        | No            | 08/12/18      |
+| Wrapper       |               |               |
+| Code          |               |               |
+|               |               |               |
++---------------+---------------+---------------+
+
+[^1]: Spelling intentional.

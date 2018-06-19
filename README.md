@@ -17,7 +17,7 @@ SRV is a rewrite and redesign of
     2.  [Build Tool](#build-tool)
     3.  [Client](#client)
     4.  [Server](#server)
-    5.  [Sources](#sources)
+    5.  \[Sources\]
     6.  [Server Protocol](#server-protocol)
 
 ## Goals
@@ -212,12 +212,33 @@ theoretically platform-neutral, the complexity of compiling a mixed C
 and python library results in a platform specific build system
 (i.e. calling external processes and using bash). Luckily, there are
 alternatives, especially for anything written on the JVM. Scala and Java
-can use the platform-independent Gradle build system. That being said,
-build tools can call external commands, so we still must be careful. If
-we need to build, for instance, python libraries, we should make sure to
-separate those libraries into their own packages, and build them with an
-appropriate build tool. Because we are using both Scala and Java, SBT
-has been chosen.
+can use the platform-independent Gradle and SBT build systems. That
+being said, these build tools can call external commands, so we still
+must be careful. If we need to build, for instance, python libraries, we
+should make sure to separate those libraries into their own packages,
+and build them with an appropriate build tool. Because we are using both
+Scala and Java, SBT has been chosen.
+
+### Wrapper
+
+Much like SVR, the SRV server runs in the background. However, unlike
+SVR, SRV is started via a wrapper, so that once the wrapper exits, the
+caller of the wrapper will know whether or not SRV has sucessfully
+started. For instance:
+
+``` bash
+srv --start
+if [ "$?" = "0" ]
+then
+    echo "SRV has sucessfully started"
+else
+    echo "SRV failed to start"
+fi
+```
+
+The wrapper also assists in other operations, such as killing the
+server, getting information about how to run the server, and checking
+whether the server is up. The wrapper is written in Java.
 
 ### Client
 
@@ -233,6 +254,43 @@ from raw sources, like video cameras, and break them up into frames,
 which can be accessed individually by the client. Therefore, the server
 takes requests related to serving video streams.
 
-### Sources
-
 ### Server Protocol
+
+SRV uses two basic protocols: UDP for broadcasting and routing video
+streams, and TCP for requests. TCP requests will be sent by the wrapper
+to the server. For instance, the wrapper may ask the server to open a
+stream.
+
+UDP will be used to broadcast video streams to all the client. The UDP
+packets will be very simple: they start with one byte that serves as a
+relative time stamp, then have one byte that determines which stream it
+is, then the stream.
+
+The byte that serves as a relative time stamp will be a number, 0-255,
+that determines what relative position in the stream an image is. For
+instance, the first image sent by the SRV server will be numbered 0,
+then the next one will be 1, all the way up to 255. After 255, the next
+number is 0.
+
+The byte that determines which stream it is will be a number, 0-255,
+which serves as the id of the stream. The id will be passed to the
+server by the wrapper. The id will also be associated with a string,
+which is passed to the server by the wrapper. The server will then hold
+that id. The ids then can be queried through the wrapper process.
+
+SRV uses the UDP network protocol. Most of the protocol can be broken up
+into two catagories: requests to open a source, and requests centered on
+the stream of frames from the
+source.
+
+|       |      |                                                               |                      |
+| ----- | ---- | ------------------------------------------------------------- | -------------------- |
+| Name  | Type | Description                                                   | Low level Desciption |
+| Alive | TCP  | A peice of data sent by the SRV server when it is initialized | 1                    |
+|       |      |                                                               |                      |
+
+| Name | Description | Request | Response |
+| ---- | ----------- | ------- | -------- |
+|      |             |         |          |
+|      |             |         |          |
+|      |             |         |          |
