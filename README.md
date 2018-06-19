@@ -36,7 +36,8 @@ router.
 
 In order to meet these goals, SRV has made a few design changes to SVR.
 Major design changes include using Java over C for portability, using a
-JVM based build tool over Make and CMake for the build tool, and
+JVM based build tool over Make and CMake for the build tool, and adding
+a wrapper to handle the lifecycle of the server.
 
 ### Language Choice
 
