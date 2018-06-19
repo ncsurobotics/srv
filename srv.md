@@ -358,7 +358,8 @@ Mock JSON object example:
       "name": "othersourcename"
     }
   ]
-}```
+}
+```
 
 The source state will consist of a 256 entry-long
 associative array. The array entries will consist
