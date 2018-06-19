@@ -19,6 +19,7 @@ SRV is a rewrite and redesign of
     4.  [Server](#server)
     5.  [Server Protocol](#server-protocol)
     6.  [Timeline](#timeline)
+    7.  [Footnotes](#footnotes)
 
 ## Goals
 
@@ -410,5 +411,7 @@ queried through the wrapper process.
 | Srv (server)              | No        | 07/29/18      |
 | Numpy array to udp script | No        | 08/05/18      |
 | Python Wrapper Code       | No        | 08/12/18      |
+
+## Footnotes
 
 1.  Spelling intentional.

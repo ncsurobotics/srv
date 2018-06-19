@@ -22,6 +22,7 @@ the seawolf video router.
    4. [Server]
    5. [Server Protocol]
    6. [Timeline]
+   7. [Footnotes]
 
 ## Goals
 Along with SVR's goals of providing a server and client for realtime passing
@@ -495,5 +496,7 @@ process.
 | Code          |               |               |
 |               |               |               |
 +---------------+---------------+---------------+
+
+## Footnotes
 
 [^1]: Spelling intentional.
