@@ -18,6 +18,9 @@ auto main() -> int {
       if (error && error != boost::asio::error::message_size) {
         throw boost::system::system_error(error);
       }
+
+      std::string message = "daytime";
+      
     }
 
     // std::string message = "asdf";
