@@ -4,7 +4,7 @@
 
 using boost::asio::ip::udp;
 
-auto main() -> int {
+int main() {
   try {
     boost::asio::io_service io_service;
     udp::socket socket(io_service, udp::endpoint(udp::v4(), 13));
@@ -23,10 +23,6 @@ auto main() -> int {
       
     }
 
-    // std::string message = "asdf";
-    // boost::system::error_code ignored_error;
-    // socket.send_to(boost::asio::buffer(message),
-    //                remote_endpoint, 0, ignored_error);
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
   }
