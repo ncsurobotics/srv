@@ -13,17 +13,17 @@ int main(int argc, char* argv[])
       std::cerr << "Usage: client <host>" << std::endl;
       return 1;
     }
-
     boost::asio::io_service io_service;
-
     udp::resolver resolver(io_service);
     udp::resolver::query query(udp::v4(), argv[1], "daytime");
     udp::endpoint receiver_endpoint = *resolver.resolve(query);
 
     udp::socket socket(io_service);
     socket.open(udp::v4());
+    std::array<char, 1> send_buf  = { 0 };
 
-    boost::array<char, 1> send_buf  = { 0 };
+    std::cout << "    " << receiver_endpoint << std::endl;
+    std::cout << send_buf[0] << std::endl;
     socket.send_to(boost::asio::buffer(send_buf), receiver_endpoint);
 
     boost::array<char, 128> recv_buf;
