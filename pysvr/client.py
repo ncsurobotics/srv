@@ -1,43 +1,32 @@
 import cv2
 import socket, pickle, time
+from srv_settings import client_ip_port
+from srv_settings import server_ip_port
+from nettools import RequestSender
+import commands
 
-COMMAND_BUFFER = 1024
+# Request sender
+requestSender = RequestSender()
 
-IMG_BUFFER = 60000
-
-#the client's ip + port for recieving images
-ip = "127.0.01"
-port = 5006
-
-#SRV's ip + port that client mails
-SRV_ip = "127.0.01"
-SRV_port = 5005
-
-
-#img socket recv img
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind((ip, port))
-sock.settimeout(1.0)
-
+# The window in which the images are displayed
 cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
 
-command = "send down," + ip + "," + str(port)
+# The request to send to the server
+command = commands.Image("down")
 
 connected = True
 
 while connected:
-    print "requesting"
-    sock.sendto(command, (SRV_ip, SRV_port))
+    print("requesting")
+    requestSender.send(command)
     try:
-        data, addr = sock.recvfrom(IMG_BUFFER)
+        data = requestSender.receive()
     except socket.timeout:
-        print "SRV Connection lost"
+        print("SRV Connection lost")
         connected = False
         break
 
-    encodedImg = pickle.loads(data)
-    
-    img = cv2.imdecode(encodedImg, 1)
+    img = cv2.imdecode(data, 1)
 
     cv2.imshow('recieved img', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
