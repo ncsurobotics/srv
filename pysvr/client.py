@@ -20,13 +20,18 @@ while connected:
     print("requesting")
     requestSender.send(command)
     try:
-        data = requestSender.receive()
+        msg = requestSender.receive()
     except socket.timeout:
         print("SRV Connection lost")
         connected = False
         break
-
-    img = cv2.imdecode(data, 1)
+    if msg.__class__.__name__ is 'StreamEnd':
+        break
+    if msg.__class__.__name__ is 'UnknownSource':
+        print "Error: Unknown source name "
+        break
+    #otherwise, treat msg as an image's encoded data
+    img = cv2.imdecode(msg, 1)
 
     cv2.imshow('recieved img', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
