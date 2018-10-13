@@ -25,7 +25,7 @@ def startCams():
     #addSource(Source("front", 1))
 
 def startFeed():
-    #addSource(Source("fast.mp4"))
+    #addSource(Source("/home/ben/Videos/fast.mp4"))
     print "SOURCES", sources
 
 
@@ -62,20 +62,22 @@ while True:
     request, addr = requestReceiver.receive()
     print(request)
     if request.__class__.__name__ is 'Kill':
+        for name in sources:
+            sources[name].cap.release()
         break
     elif request.__class__.__name__ is 'Image':
         outgoing_ip_port = request.ip_port
         try:
             if not (request.cam in sources):
                 #Tell the client that the source is unknown
-                requestReceiver.send(commands.UnknownSource())
-                pass
+                requestReceiver.send(commands.UnknownSource(), pickled=False)
             try:
                 data = compressFrame(request.cam)
                 requestReceiver.send(data)
             except StreamFinishedException:
                 #tell the camera that the video file has finished
-                requestReceiver.send(commands.StreamEnd())
+                sources[request.cam].cap.release()
+                requestReceiver.send(commands.StreamEnd(), pickled=False)
         except ValueError:
             print('Invalid camera name: {}'.format(request.cam))
 

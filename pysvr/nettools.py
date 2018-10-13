@@ -47,9 +47,13 @@ class RequestReceiver(object):
 
     """Send some data.
 Assume the data is already pickled."""
-    def send(self, data):
-        self.sock.sendto(data, client_ip_port)
+    def send(self, data, pickled=True):
+        if pickled:
+            self.sock.sendto(data, client_ip_port)
+        else:
+            self.sock.sendto(pickle.dumps(data), client_ip_port)
         return
+
 
     """Receive a request and the address as a tuple.
 When no request is recieved, throw the exception

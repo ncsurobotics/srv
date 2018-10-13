@@ -13,7 +13,6 @@ cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
 
 # The request to send to the server
 command = commands.Image("down")
-
 connected = True
 
 while connected:
@@ -26,6 +25,7 @@ while connected:
         connected = False
         break
     if msg.__class__.__name__ is 'StreamEnd':
+        print "Finished playing"
         break
     if msg.__class__.__name__ is 'UnknownSource':
         print "Error: Unknown source name "
