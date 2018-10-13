@@ -26,7 +26,7 @@ def startCams():
 
 def startFeed():
     #addSource(Source("/home/ben/Videos/fast.mp4"))
-    print "SOURCES", sources
+    print("SOURCES {}".format(sources))
 
 
 def swapCams():
