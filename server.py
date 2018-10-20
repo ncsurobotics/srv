@@ -1,7 +1,8 @@
 import pickle
 import cv2
 from srv_settings import IMG_BUFFER
-from nettools import RequestReceiver
+from srv_settings import SVR_ADDRESS
+from nettools import MailBox
 from source import Source
 import commands
 from StreamFinishedException import StreamFinishedException
@@ -51,7 +52,7 @@ def compressFrame(sourceName):
 
 
 # Set up the socket for receiving requests
-requestReceiver = RequestReceiver()
+mailBox = MailBox(ip_and_port=SVR_ADDRESS)
 
 #start up the cam sources
 startCams()
@@ -59,25 +60,30 @@ startFeed()
 
 while True:
     print('reading')
-    request, addr = requestReceiver.receive()
-    print(request)
+    request, addr = mailBox.receive()
+    print "Got client stuff"
+    #print(request)
+    print request.__class__.__name__
     if request.__class__.__name__ is 'Kill':
         for name in sources:
             sources[name].cap.release()
         break
     elif request.__class__.__name__ is 'Image':
-        outgoing_ip_port = request.ip_port
+        print "IMAGE" * 4
+        outgoing_ip_port = addr
         try:
+            print "Request cam: " * 14, request.cam
             if not (request.cam in sources):
                 #Tell the client that the source is unknown
-                requestReceiver.send(commands.UnknownSource(), pickled=False)
+                mailBox.send(commands.UnknownSource(), addr)
             try:
                 data = compressFrame(request.cam)
-                requestReceiver.send(data)
+                #data should already be pickled
+                mailBox.send(data, addr, pickled=True)
             except StreamFinishedException:
                 #tell the camera that the video file has finished
                 sources[request.cam].cap.release()
-                requestReceiver.send(commands.StreamEnd(), pickled=False)
+                mailBox.send(commands.StreamEnd(), addr)
         except ValueError:
             print('Invalid camera name: {}'.format(request.cam))
 

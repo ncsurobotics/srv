@@ -1,12 +1,11 @@
 import cv2
 import socket, pickle, time
-from srv_settings import client_ip_port
-from srv_settings import server_ip_port
-from nettools import RequestSender
+from srv_settings import SVR_ADDRESS
+from nettools import MailBox
 import commands
 
 # Request sender
-requestSender = RequestSender()
+mailBox = MailBox()
 
 # The window in which the images are displayed
 cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
@@ -17,9 +16,12 @@ connected = True
 
 while connected:
     print("requesting")
-    requestSender.send(command)
+    mailBox.send(command, SVR_ADDRESS, pickled=False)
+    print "Sent"
     try:
-        msg = requestSender.receive()
+        print "Waiting to hear from server"
+        msg,_ = mailBox.receive()
+        print "Heard from server"
     except socket.timeout:
         print("SRV Connection lost")
         connected = False
