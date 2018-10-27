@@ -1,8 +1,14 @@
+import sys
 import cv2
 import socket, pickle, time
 from srv_settings import SVR_ADDRESS
 from nettools import MailBox
 import commands
+
+if len(sys.argv) != 2:
+    print "Usage: python client.py [command / stream name]\n(possible commands = kill, possible streams = down,forward)"
+    exit()
+streamName = sys.argv[1]
 
 # Request sender
 mailBox = MailBox()
@@ -11,17 +17,18 @@ mailBox = MailBox()
 cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
 
 # The request to send to the server
-command = commands.Image("down")
+if sys.argv[1] == "kill":
+    command = commands.Kill()
+else:
+    command = commands.Image(sys.argv[1])
 connected = True
 
 while connected:
-    print("requesting")
     mailBox.send(command, SVR_ADDRESS, pickled=False)
-    print "Sent"
+    if sys.argv[1] == "kill":
+        break
     try:
-        print "Waiting to hear from server"
         msg,_ = mailBox.receive()
-        print "Heard from server"
     except socket.timeout:
         print("SRV Connection lost")
         connected = False

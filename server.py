@@ -6,6 +6,8 @@ from nettools import MailBox
 from source import Source
 import commands
 from StreamFinishedException import StreamFinishedException
+import sys
+import os
 
 #initial quality image compressed to
 START_QUALITY = 70
@@ -14,6 +16,7 @@ MIN_QUALITY = 5
 #rate quality decreases at
 QUALITY_SHRINK_RATE = 10
 
+SERVER_STARTED = False
 sources = {}
 
 def addSource(source):
@@ -23,12 +26,11 @@ def addSource(source):
 def startCams():
     addSource(Source("down", 0))
     #TODO uncomment this line when using computer with 2 web cams
-    #addSource(Source("front", 1))
+    addSource(Source("front", 1))
 
 def startFeed():
     #addSource(Source("/home/ben/Videos/fast.mp4"))
-    print("SOURCES {}".format(sources))
-
+    pass
 
 def swapCams():
     temp = downCam
@@ -50,42 +52,51 @@ def compressFrame(sourceName):
     else:
         raise ValueError('Unknown source')
 
+def run():
+    #if SERVER_STARTED:
+    #    pass
+    print "SRV has begun, Process Id:", os.getpid()
+    SERVER_STARTED = True
 
-# Set up the socket for receiving requests
-mailBox = MailBox(ip_and_port=SVR_ADDRESS)
+    sources = {}
 
-#start up the cam sources
-startCams()
-startFeed()
+    # Set up the socket for receiving requests
+    mailBox = MailBox(ip_and_port=SVR_ADDRESS)
 
-while True:
-    print('reading')
-    request, addr = mailBox.receive()
-    print "Got client stuff"
-    #print(request)
-    print request.__class__.__name__
-    if request.__class__.__name__ is 'Kill':
-        for name in sources:
-            sources[name].cap.release()
-        break
-    elif request.__class__.__name__ is 'Image':
-        print "IMAGE" * 4
-        outgoing_ip_port = addr
-        try:
-            print "Request cam: " * 14, request.cam
-            if not (request.cam in sources):
-                #Tell the client that the source is unknown
-                mailBox.send(commands.UnknownSource(), addr)
+    #start up the cam sources
+    startCams()
+    startFeed()
+
+    while True:
+        request, addr = mailBox.receive()
+        if request.__class__.__name__ is 'Kill':
+            for name in sources:
+                sources[name].cap.release()
+            break
+        elif request.__class__.__name__ is 'Image':
+            outgoing_ip_port = addr
             try:
-                data = compressFrame(request.cam)
-                #data should already be pickled
-                mailBox.send(data, addr, pickled=True)
-            except StreamFinishedException:
-                #tell the camera that the video file has finished
-                sources[request.cam].cap.release()
-                mailBox.send(commands.StreamEnd(), addr)
-        except ValueError:
-            print('Invalid camera name: {}'.format(request.cam))
+                if not (request.cam in sources):
+                    #Tell the client that the source is unknown
+                    mailBox.send(commands.UnknownSource(), addr)
+                try:
+                    data = compressFrame(request.cam)
+                    #data should already be pickled
+                    mailBox.send(data, addr, pickled=True)
+                except StreamFinishedException:
+                    #tell the camera that the video file has finished
+                    sources[request.cam].cap.release()
+                    mailBox.send(commands.StreamEnd(), addr)
+            except ValueError:
+                print('Invalid camera name: {}'.format(request.cam))
 
 
-#cap.release()
+def getSource(streamName):
+    if not streamName in sources:
+        raise ValueError("Invalid Stream Name: " + streamName)
+    else:
+        return sources[streamName]
+
+if len(sys.argv) >= 2:
+    if sys.argv[1] == "run":
+        run()
