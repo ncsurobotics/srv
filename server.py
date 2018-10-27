@@ -24,9 +24,13 @@ def addSource(source):
 
 """Start video capture of the cam streams."""
 def startCams():
+    print "Started cams"
     addSource(Source("down", 0))
     #TODO uncomment this line when using computer with 2 web cams
     addSource(Source("front", 1))
+    print "Sources: ", sources
+def clearSources():
+    source = {}
 
 def startFeed():
     #addSource(Source("/home/ben/Videos/fast.mp4"))
@@ -58,7 +62,7 @@ def run():
     print "SRV has begun, Process Id:", os.getpid()
     SERVER_STARTED = True
 
-    sources = {}
+    clearSources()
 
     # Set up the socket for receiving requests
     mailBox = MailBox(ip_and_port=SVR_ADDRESS)
@@ -78,6 +82,8 @@ def run():
             try:
                 if not (request.cam in sources):
                     #Tell the client that the source is unknown
+                    print "server doesn't know source: ", request.cam
+                    print "Possible sources are: ", sources.keys()
                     mailBox.send(commands.UnknownSource(), addr)
                 try:
                     data = compressFrame(request.cam)
