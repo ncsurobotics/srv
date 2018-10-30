@@ -1,5 +1,6 @@
 from server import *
 from source import *
+from connection import *
 import subprocess
 import os
 import time
@@ -22,7 +23,7 @@ def playDown():
   return clip
 
 def stream(name):
-  return getSource(name)
+  return Connection(name)
 
 def kill(srvp):
   os.system('python /usr/local/lib/python2.7/dist-packages/srv/client.py kill')

@@ -15,6 +15,7 @@ class Connection:
       self.command = commands.Image(name)
       self.frame = None
       self.playingVideo = False
+      self.name = name
 
   def getNextFrame(self):
     self.mailBox.send(self.command, SVR_ADDRESS, pickled=False)
@@ -31,12 +32,14 @@ class Connection:
 
   def openWindow(self):
     self.playingVideo = True
-    cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
-    while self.playingVideo:
+    cv2.namedWindow(self.name, cv2.WINDOW_NORMAL)
+      
+  def playWindow():
+    if self.playingVideo:
       self.getNextFrame()
       cv2.imshow('recieved img', self.frame)
       if cv2.waitKey(1) & 0xFF == ord('q'):
-          break
+          self.closeWindow()
 
   def closeWindow(self):
     self.playingVideo = False
