@@ -28,7 +28,7 @@ def startCams():
     addSource(Source("down", 0))
     #TODO uncomment this line when using computer with 2 web cams
     addSource(Source("front", 1))
-    print "Sources: ", sources
+    print "Sources: ", sources.keys()
 def clearSources():
     source = {}
 
