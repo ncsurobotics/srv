@@ -1,4 +1,4 @@
-import commands
+import net_commands
 from srv_settings import SVR_ADDRESS
 from nettools import MailBox
 import cv2
@@ -10,9 +10,9 @@ class Connection:
   def __init__(self, name):
     self.mailBox = MailBox()
     if name == "kill":
-      self.mailBox.send(commands.Kill(), SVR_ADDRESS, pickled=False)
+      self.mailBox.send(net_commands.Kill(), SVR_ADDRESS, pickled=False)
     else:
-      self.command = commands.Image(name)
+      self.command = net_commands.Image(name)
       self.frame = None
       self.playingVideo = False
       self.name = name
@@ -29,18 +29,21 @@ class Connection:
         raise Exception("Error: Unknown source name ")
     self.frame = cv2.imdecode(msg, 1)
     return self.frame
+  def closeWindow(self):
+    self.playingVideo = False
+    cv2.destroyWindow(self.name)
 
   def openWindow(self):
     self.playingVideo = True
     cv2.namedWindow(self.name, cv2.WINDOW_NORMAL)
       
-  def playWindow():
+  def playWindow(self):
     if self.playingVideo:
       self.getNextFrame()
-      cv2.imshow('recieved img', self.frame)
+      cv2.imshow(self.name, self.frame)
       if cv2.waitKey(1) & 0xFF == ord('q'):
-          self.closeWindow()
+          #self.closeWindow()
+          self.playingVideo = False
+          cv2.destroyWindow(self.name)
 
-  def closeWindow(self):
-    self.playingVideo = False
-    cv2.destroyAllWindows()
+  

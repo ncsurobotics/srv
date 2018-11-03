@@ -1,1 +1,1 @@
-python server.py run
+python startServer.py

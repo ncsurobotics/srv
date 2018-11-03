@@ -4,9 +4,8 @@ from srv_settings import IMG_BUFFER
 from srv_settings import SVR_ADDRESS
 from nettools import MailBox
 from source import Source
-import commands
+import net_commands
 from StreamFinishedException import StreamFinishedException
-import sys
 import os
 
 #initial quality image compressed to
@@ -57,8 +56,6 @@ def compressFrame(sourceName):
         raise ValueError('Unknown source')
 
 def run():
-    #if SERVER_STARTED:
-    #    pass
     print "SRV has begun, Process Id:", os.getpid()
     SERVER_STARTED = True
 
@@ -84,7 +81,7 @@ def run():
                     #Tell the client that the source is unknown
                     print "server doesn't know source: ", request.cam
                     print "Possible sources are: ", sources.keys()
-                    mailBox.send(commands.UnknownSource(), addr)
+                    mailBox.send(net_commands.UnknownSource(), addr)
                 try:
                     data = compressFrame(request.cam)
                     #data should already be pickled
@@ -92,7 +89,7 @@ def run():
                 except StreamFinishedException:
                     #tell the camera that the video file has finished
                     sources[request.cam].cap.release()
-                    mailBox.send(commands.StreamEnd(), addr)
+                    mailBox.send(net_commands.StreamEnd(), addr)
             except ValueError:
                 print('Invalid camera name: {}'.format(request.cam))
 
@@ -102,7 +99,3 @@ def getSource(streamName):
         raise ValueError("Invalid Stream Name: " + streamName)
     else:
         return sources[streamName]
-
-if len(sys.argv) >= 2:
-    if sys.argv[1] == "run":
-        run()
