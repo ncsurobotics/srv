@@ -33,6 +33,12 @@ class Source(object):
       raise StreamFinishedException
     return frame
 
-
-    
+class StillSource(object):
+  def __init__(self, name, img):
+    self.img = img
+    self.name = name
+  def updateFrame(self, img):
+    self.img = img
+  def getNextFrame(self):
+    return self.img
     

@@ -24,3 +24,12 @@ Use the cam parameter to determine which camera to request."""
     def __init__(self, cam):
         self.cam = cam
         return
+"""Request from client to SRV to post an image to SRV with the given name."""
+class Post(object):
+    def __init__(self, name, compressedImg):
+        self.name = name
+        self.compressedImg = compressedImg
+
+"""Notification to a client that the SRV has decided to accept the Post."""
+class PostAccept(object):
+    dummy = []

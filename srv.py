@@ -21,17 +21,10 @@ def playDown():
   #srvp = subprocess.Popen([sys.executable, "sh", "/usr/local/lib/python2.7/dist-packages/srv/startSrv.sh", "&"])
   print "client PID:", clip
   return clip
-
+"""Open connection for client to SRV server."""
 def stream(name):
   return Connection(name)
 
 def kill(srvp):
   os.system('python /usr/local/lib/python2.7/dist-packages/srv/client.py kill')
   print "Killed SRV"
-
-def test():
-  s = connect()
-  time.sleep(2)
-  playDown()
-  time.sleep(5)
-  kill(s)

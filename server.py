@@ -1,19 +1,13 @@
 import pickle
 import cv2
-from srv_settings import IMG_BUFFER
-from srv_settings import SVR_ADDRESS
+from srv_settings import IMG_BUFFER, SVR_ADDRESS, START_QUALITY, MIN_QUALITY, QUALITY_SHRINK_RATE
 from nettools import MailBox
-from source import Source
+from source import Source, StillSource
 import net_commands
 from StreamFinishedException import StreamFinishedException
 import os
 
-#initial quality image compressed to
-START_QUALITY = 70
-#min jpeg quality is 5
-MIN_QUALITY = 5
-#rate quality decreases at
-QUALITY_SHRINK_RATE = 10
+
 
 SERVER_STARTED = False
 sources = {}
@@ -92,6 +86,18 @@ def run():
                     mailBox.send(net_commands.StreamEnd(), addr)
             except ValueError:
                 print('Invalid camera name: {}'.format(request.cam))
+        elif request.__class__.__name__ is 'Post':
+            #need to unpickle the image
+            print "Got compressed img: ", request.compressedImg
+            compressedImg = request.compressedImg
+            print "GOT POST IMG: ", compressedImg, "GOT POST"
+            #decompress image
+            img = cv2.imdecode(compressedImg, 1)
+            if request.name in sources:
+                sources[request.name].updateFrame(img)
+            else:
+                newSource = StillSource(request.name, img)
+                addSource(newSource)
 
 
 def getSource(streamName):

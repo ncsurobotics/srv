@@ -45,7 +45,7 @@ class MailBox(object):
         if pickled:
             self.sock.sendto(request, to_addr)
         else:
-            print "sending: ", pickle.dumps(request)
+            #print "sending: ", pickle.dumps(request)
             self.sock.sendto(pickle.dumps(request), to_addr)
         return
     
@@ -61,7 +61,6 @@ class MailBox(object):
             makes it work when communicating programs are in different directories
             """
             newData = data.replace('srv.', '')
-            #print "changing data to", newData
             data = newData
             return pickle.loads(data), addr
         else:

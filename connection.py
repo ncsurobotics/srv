@@ -2,6 +2,9 @@ import net_commands
 from srv_settings import SVR_ADDRESS
 from nettools import MailBox
 import cv2
+from server import compressFrame
+import img_compression as ic
+import pickle
 """
 Connection stream to SRV server. Can stream from the connection. Basically a client object.
 """
@@ -46,4 +49,11 @@ class Connection:
           self.playingVideo = False
           cv2.destroyWindow(self.name)
 
-  
+  #replacement for svr debug, client posts an image to the server. Then other clients can read it.
+  #TODO add handshake so that it waits for server to reply that it has read it
+  def post(self, img):
+    #compress image
+    compressedImg = ic.compress(img)
+    compressedImg = pickle.loads(compressedImg)
+    #tell server to post img
+    self.mailBox.send(net_commands.Post(self.name, compressedImg), SVR_ADDRESS)
