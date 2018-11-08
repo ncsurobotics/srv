@@ -7,6 +7,8 @@ import img_compression as ic
 import pickle
 """
 Connection stream to SRV server. Can stream from the connection. Basically a client object.
+
+TODO add in closing connection or source
 """
 
 class Connection:
@@ -19,7 +21,14 @@ class Connection:
       self.frame = None
       self.playingVideo = False
       self.name = name
-
+  """Get server's sources"""
+  def getSources(self):
+    self.mailBox.send(net_commands.GetSources(), SVR_ADDRESS, pickled=False)
+    try:
+        sources,_ = self.mailBox.receive()
+    except socket.timeout:
+        raise Exception("SRV Connection lost")
+    return sources
   def getNextFrame(self):
     self.mailBox.send(self.command, SVR_ADDRESS, pickled=False)
     try:
@@ -51,9 +60,12 @@ class Connection:
 
   #replacement for svr debug, client posts an image to the server. Then other clients can read it.
   #TODO add handshake so that it waits for server to reply that it has read it
-  def post(self, img):
+  def post(self, img, name=None):
     #compress image
     compressedImg = ic.compress(img)
     compressedImg = pickle.loads(compressedImg)
+    #name should default to self.name
+    if name==None:
+      name = self.name
     #tell server to post img
-    self.mailBox.send(net_commands.Post(self.name, compressedImg), SVR_ADDRESS)
+    self.mailBox.send(net_commands.Post(name, compressedImg), SVR_ADDRESS)

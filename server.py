@@ -14,6 +14,10 @@ sources = {}
 
 def addSource(source):
     sources[source.name] = source
+    print "Added source: ", source.name
+    print "Sources: ", sources.keys()
+def removeSource(source):
+    del sources[source.name]
 
 """Start video capture of the cam streams."""
 def startCams():
@@ -59,8 +63,8 @@ def run():
     mailBox = MailBox(ip_and_port=SVR_ADDRESS)
 
     #start up the cam sources
-    startCams()
-    startFeed()
+    #startCams()
+    #startFeed()
 
     while True:
         request, addr = mailBox.receive()
@@ -88,9 +92,9 @@ def run():
                 print('Invalid camera name: {}'.format(request.cam))
         elif request.__class__.__name__ is 'Post':
             #need to unpickle the image
-            print "Got compressed img: ", request.compressedImg
+            #print "Got compressed img: ", request.compressedImg
             compressedImg = request.compressedImg
-            print "GOT POST IMG: ", compressedImg, "GOT POST"
+            #print "GOT POST IMG: ", compressedImg, "GOT POST"
             #decompress image
             img = cv2.imdecode(compressedImg, 1)
             if request.name in sources:
@@ -98,6 +102,9 @@ def run():
             else:
                 newSource = StillSource(request.name, img)
                 addSource(newSource)
+        elif request.__class__.__name__ is 'GetSources':
+            mailBox.send(sources.keys(), addr)
+
 
 
 def getSource(streamName):

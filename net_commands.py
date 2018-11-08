@@ -30,6 +30,6 @@ class Post(object):
         self.name = name
         self.compressedImg = compressedImg
 
-"""Notification to a client that the SRV has decided to accept the Post."""
-class PostAccept(object):
+"""Request to get all sources in SRV."""
+class GetSources(object):
     dummy = []
