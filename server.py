@@ -14,18 +14,13 @@ sources = {}
 
 def addSource(source):
     sources[source.name] = source
-    print "Added source: ", source.name
+    print "Added source:", source.name
     print "Sources: ", sources.keys()
-def removeSource(source):
-    del sources[source.name]
+def removeSource(name):
+    del sources[name]
+    print "Removed source:", name
+    print "Sources: ", sources.keys()
 
-"""Start video capture of the cam streams."""
-def startCams():
-    print "Started cams"
-    addSource(Source("down", 0))
-    #TODO uncomment this line when using computer with 2 web cams
-    addSource(Source("front", 1))
-    print "Sources: ", sources.keys()
 def clearSources():
     source = {}
 
@@ -37,6 +32,14 @@ def swapCams():
     temp = downCam
     downCam = frontCam
     frontCam = temp
+
+def startCams():
+    print "Started cams"
+    pass
+    addSource(Source("down", 0))
+    #TODO uncomment this line when using computer with 2 web cams
+    addSource(Source("front", 1))
+    print "Sources: ", sources.keys()
 
 def compressFrame(sourceName):
     if sourceName in sources:
@@ -85,9 +88,11 @@ def run():
                     #data should already be pickled
                     mailBox.send(data, addr, pickled=True)
                 except StreamFinishedException:
-                    #tell the camera that the video file has finished
+                    #tell the client that the video file has finished
                     sources[request.cam].cap.release()
                     mailBox.send(net_commands.StreamEnd(), addr)
+                    #remove the finished source
+                    removeSource(request.cam)
             except ValueError:
                 print('Invalid camera name: {}'.format(request.cam))
         elif request.__class__.__name__ is 'Post':
@@ -104,6 +109,8 @@ def run():
                 addSource(newSource)
         elif request.__class__.__name__ is 'GetSources':
             mailBox.send(sources.keys(), addr)
+        elif request.__class__.__name__ is 'StartCams':
+            startCams()
 
 
 

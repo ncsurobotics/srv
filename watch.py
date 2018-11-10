@@ -1,6 +1,7 @@
 import srv
 import cv2
 import connection
+from StreamFinishedException import StreamFinishedException
 
 def getSources():
   c = connection.Connection("get sources")
@@ -14,26 +15,20 @@ def run():
     cv2.namedWindow(sourceName, cv2.WINDOW_NORMAL)
     connections.append(connection.Connection(sourceName))
   while True:
+    if len(sources) == 0:
+      break
     for i in range(len(sources)):
-      cv2.imshow(sources[i], connections[i].getNextFrame())
+      try:
+        cv2.imshow(sources[i], connections[i].getNextFrame())
+      except StreamFinishedException:
+        connections.pop(i)
+        src = sources.pop(i)
+        cv2.destroyWindow(src)
+        print src, "stream finished."
+        break
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
   for sourceName in sources:
     cv2.destroyWindow(sourceName)
-
-def run2():
-  sources = getSources()
-  c = connection.Connection("down")
-  cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-  
-  
-  pass
-  while True:
-    f = c.getNextFrame()
-    cv2.imshow('image',f)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-  cv2.destroyAllWindows()
-
 
 run()

@@ -4,8 +4,6 @@ import net_commands
 from srv_settings import IMG_BUFFER
 import sys
 
-print net_commands
-
 #add modules to system so pickle knows of them
 sys.modules['net_commands'] = net_commands
 

@@ -33,3 +33,7 @@ class Post(object):
 """Request to get all sources in SRV."""
 class GetSources(object):
     dummy = []
+
+"""Request to start camera feed."""
+class StartCams(object):
+    dummy = []

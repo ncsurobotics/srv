@@ -28,3 +28,4 @@ def stream(name):
 def kill(srvp):
   os.system('python /usr/local/lib/python2.7/dist-packages/srv/client.py kill')
   print "Killed SRV"
+"""Start video capture of the cam streams."""

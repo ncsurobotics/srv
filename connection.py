@@ -5,6 +5,7 @@ import cv2
 from server import compressFrame
 import img_compression as ic
 import pickle
+from StreamFinishedException import StreamFinishedException
 """
 Connection stream to SRV server. Can stream from the connection. Basically a client object.
 
@@ -16,6 +17,8 @@ class Connection:
     self.mailBox = MailBox()
     if name == "kill":
       self.mailBox.send(net_commands.Kill(), SVR_ADDRESS, pickled=False)
+    elif name == "StartCams":
+      self.mailBox.send(net_commands.StartCams(), SVR_ADDRESS, pickled=False)
     else:
       self.command = net_commands.Image(name)
       self.frame = None
@@ -36,7 +39,7 @@ class Connection:
     except socket.timeout:
         raise Exception("SRV Connection lost")
     if msg.__class__.__name__ is 'StreamEnd':
-        raise Exception("Finished playing")
+        raise StreamFinishedException("Finished playing")
     if msg.__class__.__name__ is 'UnknownSource':
         raise Exception("Error: Unknown source name ")
     self.frame = cv2.imdecode(msg, 1)
