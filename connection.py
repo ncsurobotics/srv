@@ -16,9 +16,11 @@ class Connection:
   def __init__(self, name):
     self.mailBox = MailBox()
     if name == "kill":
-      self.mailBox.send(net_commands.Kill(), SVR_ADDRESS, pickled=False)
+      self.mailBox.send(net_commands.Kill(), SVR_ADDRESS)
     elif name == "StartCams":
-      self.mailBox.send(net_commands.StartCams(), SVR_ADDRESS, pickled=False)
+      self.mailBox.send(net_commands.StartCams(), SVR_ADDRESS)
+    elif name == "SwapCams":
+      self.mailBox.send(net_commands.SwapCams(), SVR_ADDRESS)
     else:
       self.command = net_commands.Image(name)
       self.frame = None
@@ -26,14 +28,14 @@ class Connection:
       self.name = name
   """Get server's sources"""
   def getSources(self):
-    self.mailBox.send(net_commands.GetSources(), SVR_ADDRESS, pickled=False)
+    self.mailBox.send(net_commands.GetSources(), SVR_ADDRESS)
     try:
         sources,_ = self.mailBox.receive()
     except socket.timeout:
         raise Exception("SRV Connection lost")
     return sources
   def getNextFrame(self):
-    self.mailBox.send(self.command, SVR_ADDRESS, pickled=False)
+    self.mailBox.send(self.command, SVR_ADDRESS)
     try:
         msg,_ = self.mailBox.receive()
     except socket.timeout:
@@ -66,7 +68,9 @@ class Connection:
   def post(self, img, name=None):
     #compress image
     compressedImg = ic.compress(img)
-    compressedImg = pickle.loads(compressedImg)
+    #print "COMPRESSING"
+    #print compressedImg
+    #print "COMPRESSED"
     #name should default to self.name
     if name==None:
       name = self.name

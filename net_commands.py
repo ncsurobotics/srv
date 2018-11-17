@@ -37,3 +37,7 @@ class GetSources(object):
 """Request to start camera feed."""
 class StartCams(object):
     dummy = []
+
+"""Request to swap down and front cameras"""
+class SwapCams(object):
+    dummy = []

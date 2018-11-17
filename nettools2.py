@@ -98,17 +98,8 @@ class MailBox(object):
         else:
           self.read_packets[addr] = packet_info
         if data[0] == '-':
-          #print data
-          #print "------------------"
           msg = self.read_packets[addr]
-          ##print msg
-          #print "+++++++++++++++"
           self.read_packets[addr] = ''
-          #filter out srv in pickle string
-          old = msg
-          newData = msg.replace('srv.', '')
-          msg = newData
-          #print newData
           return pickle.loads(msg), addr
     """Getter for (ip,port)"""
     def getAddress(self):

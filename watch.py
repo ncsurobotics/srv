@@ -17,6 +17,8 @@ def run(sources):
   while True:
     if len(sources) == 0:
       break
+    if len(sys.argv) == 1:
+      sources = getSources()
     for i in range(len(sources)):
       if sources[i] not in srvSources:
         connections.pop(i)

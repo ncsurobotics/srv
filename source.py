@@ -32,6 +32,8 @@ class Source(object):
     if not ret:
       raise StreamFinishedException
     return frame
+  def kill(self):
+    self.cap.release()
 
 class StillSource(object):
   def __init__(self, name, img):
@@ -41,4 +43,6 @@ class StillSource(object):
     self.img = img
   def getNextFrame(self):
     return self.img
-    
+  #no resources to free
+  def kill(self):
+    pass
