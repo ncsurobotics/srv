@@ -1,3 +1,6 @@
+// Copyright NCSU Robotics 2018
+
 auto main() -> int {
-  return 0;
+  const auto x = 0;
+  return x;
 }
