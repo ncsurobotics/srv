@@ -3,7 +3,7 @@ import cv2
 import socket, pickle, time
 from srv_settings import SVR_ADDRESS
 from nettools import MailBox
-import commands
+import net_commands
 
 if len(sys.argv) != 2:
     print "Usage: python client.py [command / stream name]\n(possible commands = kill, possible streams = down,forward)"
@@ -18,9 +18,9 @@ cv2.namedWindow('sent img', cv2.WINDOW_NORMAL)
 
 # The request to send to the server
 if sys.argv[1] == "kill":
-    command = commands.Kill()
+    command = net_commands.Kill()
 else:
-    command = commands.Image(sys.argv[1])
+    command = net_commands.Image(sys.argv[1])
 connected = True
 
 while connected:
