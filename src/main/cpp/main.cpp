@@ -35,7 +35,13 @@ const int PORT = 5005;
  * @return Always returns zero
  */
 auto main(int argc, char** argv) -> int {
-  auto server = Server(argc, argv);
+  string args[argc];
+
+  for (int i = 0; i < argc; i++) {
+    args[i] = argv[i];
+  }
+
+  auto server = Server(argc, args);
 
   try {
     return server.run();

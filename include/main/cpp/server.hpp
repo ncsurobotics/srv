@@ -21,7 +21,7 @@ class Server {
  private:
   std::unordered_map<string, string> sources;
  public:
-  Server(int argc, char** argv) noexcept;
+  Server(int argc, string* argv) noexcept;
   auto add_source(string source) -> void;
   auto remove_source(string source) -> bool;
   auto clear_source() -> void;

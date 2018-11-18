@@ -30,7 +30,7 @@ using boost::asio::buffer;
  * @param argc the amount of arguments. Should be passed down from the main function.
  * @param argv a pointer to the beginning of the argument array
  */
-Server::Server(int argc, char** argv) noexcept {
+Server::Server(int argc, string* argv) noexcept {
 }
 
 /**
