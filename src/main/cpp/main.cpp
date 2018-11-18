@@ -60,4 +60,4 @@ auto main(int, char**) -> int {
     }
     const auto x = 0;
     return x;
-  }
+}

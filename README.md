@@ -18,9 +18,10 @@ make, and a recent c++ compiler. (GCC 4.8 and Clang 7, both available in ubuntu 
 To build this code, go to the source directory and type
 
 ```bash
+conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 mkdir build
 cd build
-conan install .. --build=missing
+conan install .. --build boost opencv
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cd ..
 # The file `compile_commands.json` is optional and only useful if you are using an IDE.
@@ -46,3 +47,4 @@ Install with install.sh (you may have to customize the installation directory)
 Uninstall with uninstall.sh
 
 Remove any generated .pyc files with clean.sh
+
