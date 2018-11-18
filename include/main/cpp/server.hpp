@@ -7,22 +7,28 @@
 #include <string>
 #include <unordered_map>
 #include <tuple>
+#include <opencv2/core/core.hpp>
 
 using std::tuple;
 using std::string;
 
+using cv::Mat;
+
 class Server {
+ public:
+  static const int PORT = 5005;
+
  private:
-  Server(int argc, string *argv) noexcept;
   std::unordered_map<string, string> sources;
  public:
-  auto addSource(tuple<string, string> source) -> void;
-  auto removeSource(string source) -> bool;
-  auto clearSource() -> void;
-  auto getSource(string name) -> void;
+  Server(int argc, char** argv) noexcept;
+  auto add_source(string source) -> void;
+  auto remove_source(string source) -> bool;
+  auto clear_source() -> void;
+  auto get_source(string name) -> string;
   auto swapcams() -> void;
-  auto startCams() -> void;
-  auto compressFrame(string source) -> void;
+  auto start_cams() -> void;
+  auto compressFrame(string source) -> Mat;
   auto run() -> int;
 };
 
