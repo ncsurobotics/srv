@@ -18,5 +18,9 @@ conan_basic_setup(TARGETS)
 
 enable_testing()
 
+set("HEADERS_DIR" "${PROJECT_SOURCE_DIR}/include/main/cpp/")
+
+include_directories("${HEADERS_DIR}")
+
 add_subdirectory(src/main/cpp)
 add_subdirectory(src/test/cpp)
