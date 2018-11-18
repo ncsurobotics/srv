@@ -26,11 +26,6 @@ using boost::asio::ip::udp;
 
 
 /**
- * The port to which this program sends data
- */
-const int PORT = 5005;
-
-/**
  * The main function of the program.
  * @return Always returns zero
  */
@@ -45,8 +40,8 @@ auto main(int argc, char** argv) -> int {
 
   try {
     return server.run();
-
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;
+    return 1;
   }
 }
