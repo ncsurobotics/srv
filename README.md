@@ -7,13 +7,16 @@ in python.~~ The goal was to simplify the code used for
 Seawolf's video streaming.
 
 In order to optimize the code, some is being rewritten in c++. 
+
+# Building
 Building this code requires [conan](https://github.com/conan-io/conan), cmake,
-and make. To build this code, go to the source directory and type
+make, and a recent c++ compiler. (GCC 4.8 and Clang 7, both available in ubuntu 18.10, should work.)
+To build this code, go to the source directory and type
 
 ```bash
 mkdir build
 cd build
-conan install .. --build=missing -s cppstd=17 
+conan install .. --build=missing
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cd ..
 # The file `compile_commands.json` is optional and only useful if you are using an IDE.
