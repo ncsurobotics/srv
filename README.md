@@ -16,11 +16,15 @@ cd build
 conan install .. --build=missing -s cppstd=17 
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cd ..
+# The file `compile_commands.json` is optional and only useful if you are using an IDE.
 ln -s build/compile_commands.json
+cd build
+make
+make doc
 ```
+now there should be documentation in the `build/doc/index.html` file, and
+the executable `srv` at `build/srv`.
 
-The file `compile_commands.json` is optional and only useful if you are
-using an IDE.
 
 To edit the code, either [cquery](https://github.com/cquery-project/cquery.git) 
 (more stable) or [ccls](https://github.com/MaskRay/ccls.git) (faster) are reccommended,
