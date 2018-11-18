@@ -40,6 +40,11 @@ To edit the code, either [cquery](https://github.com/cquery-project/cquery.git)
 which can both be used with emacs, vscode, or neovim. Because we use cmake, code blocks
 should work as well.
 
+You should use [cpplint](https://github.com/cpplint/cpplint.git) and
+[scan build](https://clang-analyzer.llvm.org/scan-build.html) to make sure
+that the style and the code is acceptable.
+
+
 # Python
 
 Install with install.sh (you may have to customize the installation directory)
