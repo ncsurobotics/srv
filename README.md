@@ -21,7 +21,7 @@ To build this code, go to the source directory and type
 conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 mkdir build
 cd build
-conan install .. --build boost opencv
+conan install .. --build boost --build opencv -s cppstd=11
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cd ..
 # The file `compile_commands.json` is optional and only useful if you are using an IDE.
