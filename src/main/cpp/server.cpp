@@ -11,6 +11,7 @@
 
 // #include <optional>
 #include <iostream>
+#include <vector>
 #include <string>
 #include <utility>
 #include "boost/array.hpp"
@@ -22,10 +23,9 @@
 using std::string;
 using std::cout;
 using std::endl;
-// using std::optional;
-
 using std::unordered_map;
 using std::pair;
+using std::vector;
 
 using boost::asio::ip::udp;
 using boost::asio::io_service;
@@ -113,15 +113,21 @@ auto Server::start_cams() -> void {
  * @param source the source to compress
  * @return the compressed image
  */
-auto Server::compressFrame(string source) -> Mat {
-  // TODO(jssalzbe): fix this, this is not an actual value
+auto Server::compressFrame(string source) -> optional<vector<uchar>> {
   for (auto keyval : sources) {
-    auto source = keyval.second;
-    Mat img;
-    source.capture >> img;
-
+    auto key = keyval.first;
+    if (key == source) {
+      auto cvCap = keyval.second.capture;
+      Mat img;
+      cvCap >> img;
+      std::vector<uchar> outimg;
+      std::vector<int> params;
+      params.push_back(80);
+      cv::imencode(".jpg", img, outimg, params);
+      return outimg;
+    }
   }
-  return Mat();
+  return { };
 }
 
 /**
