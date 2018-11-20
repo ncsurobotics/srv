@@ -120,8 +120,8 @@ auto Server::compressFrame(string source) -> optional<vector<uchar>> {
       auto cvCap = keyval.second.capture;
       Mat img;
       cvCap >> img;
-      std::vector<uchar> outimg;
-      std::vector<int> params;
+      vector<uchar> outimg;
+      vector<int> params;
       params.push_back(80);
       cv::imencode(".jpg", img, outimg, params);
       return outimg;
