@@ -15,8 +15,8 @@ def run(sources):
     cv2.namedWindow(sourceName, cv2.WINDOW_NORMAL)
     connections.append(connection.Connection(sourceName))
   while True:
-    if len(sources) == 0:
-      break
+    #if len(sources) == 0:
+    #  break
     if len(sys.argv) == 1:
       sources = getSources()
     for i in range(len(sources)):

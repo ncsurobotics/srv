@@ -8,14 +8,19 @@ from StreamFinishedException import StreamFinishedException
 import os
 
 
-
 SERVER_STARTED = False
+
+"""Video sources on the server."""
 sources = {}
+
+"""Commands executed by the server."""
+commands = {}
 
 def addSource(source):
     sources[source.name] = source
     print "Added source:", source.name
     print "Sources: ", sources.keys()
+
 def removeSource(name):
     sources[name].kill()
     del sources[name]
@@ -32,15 +37,66 @@ def startFeed():
 #fix to eventually just kill old cams, then start cams with inverted 0 and 1
 #TODO grand architecture rewrite: instead of command names, send commands as
 #funcs and params
-def swapCams():
-    oldDown = sources["down"]
-    sources["down"] = sources["forward"]
-    sources["down"].name = "down"
-    sources["forward"] = oldDown
-    sources["forward"].name = "forward"
 
 
-def startCams():
+def compressFrame(sourceName):
+    if sourceName in sources:
+        img = sources[sourceName].getNextFrame()
+        #compress at 80% quality
+        result, encodedImg = cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+        return encodedImg
+    else:
+        raise ValueError('Unknown source')
+
+"""
+SRV COMMANDS
+
+These are the commands executed by the server. Clients send the function name
+and arguments, the server looks them up in the commands dictionary and executes
+them.
+"""
+
+"""Dictionary of commands that are executed by client functions."""
+
+def killServer(request):
+    for name in sources:
+        sources[name].cap.release()
+
+def sendImage(request):
+    outgoing_ip_port = addr
+    try:
+        if not (request.cam in sources):
+            #Tell the client that the source is unknown
+            print "server doesn't know source: ", request.cam
+            print "Possible sources are: ", sources.keys()
+            mailBox.send(net_commands.UnknownSource(), addr)
+        try:
+            data = compressFrame(request.cam)
+            mailBox.send(data, addr)
+        except StreamFinishedException:
+            #tell the client that the video file has finished
+            sources[request.cam].cap.release()
+            mailBox.send(net_commands.StreamEnd(), addr)
+            #remove the finished source
+            removeSource(request.cam)
+    except ValueError:
+        print('Invalid camera name: {}'.format(request.cam))
+
+def postImage(request):
+    compressedImg = request.compressedImg
+    #decompress image
+    img = cv2.imdecode(compressedImg, 1)
+    if request.name in sources:
+        sources[request.name].updateFrame(img)
+    else:
+        newSource = StillSource(request.name, img)
+        addSource(newSource)
+
+#get sources
+def sendSources(request=None):
+    mailBox.send(sources.keys(), addr)
+
+def startCams(request=None):
     print "Started cams"
     pass
     addSource(Source("down", 0))
@@ -55,20 +111,27 @@ def startCams():
     addSource(Source("/home/ben/Videos/down_crash.avi"))
     addSource(Source("/home/ben/Videos/DownFalse.avi"))
     addSource(Source("/home/ben/Videos/pathC1.mp4"))
-    
-    
-    
     print "Sources: ", sources.keys()
 
+def swapCams(request=None):
+    oldDown = sources["down"]
+    sources["down"] = sources["forward"]
+    sources["down"].name = "down"
+    sources["forward"] = oldDown
+    sources["forward"].name = "forward"
 
-def compressFrame(sourceName):
-    if sourceName in sources:
-        img = sources[sourceName].getNextFrame()
-        #compress at 80% quality
-        result, encodedImg = cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
-        return encodedImg
-    else:
-        raise ValueError('Unknown source')
+commands = {
+    'Kill'        : killServer,
+    'Image'       : sendImage,
+    'Post'        : postImage,
+    'GetSources'  : sendSources,
+    'StartCams'   : startCams,
+    'SwapCams'    : swapCams
+}
+
+"""
+END OF SRV COMMANDS
+"""
 
 def run():
     print "SRV has begun, Process Id:", os.getpid()
@@ -77,6 +140,7 @@ def run():
     clearSources()
 
     # Set up the socket for receiving requests
+    global mailBox, addr
     mailBox = MailBox(ip_and_port=SVR_ADDRESS)
 
     #start up the cam sources
@@ -85,47 +149,7 @@ def run():
 
     while True:
         request, addr = mailBox.receive()
-        if request.__class__.__name__ is 'Kill':
-            for name in sources:
-                sources[name].cap.release()
-            break
-        elif request.__class__.__name__ is 'Image':
-            outgoing_ip_port = addr
-            try:
-                if not (request.cam in sources):
-                    #Tell the client that the source is unknown
-                    print "server doesn't know source: ", request.cam
-                    print "Possible sources are: ", sources.keys()
-                    mailBox.send(net_commands.UnknownSource(), addr)
-                try:
-                    data = compressFrame(request.cam)
-                    mailBox.send(data, addr)
-                except StreamFinishedException:
-                    #tell the client that the video file has finished
-                    sources[request.cam].cap.release()
-                    mailBox.send(net_commands.StreamEnd(), addr)
-                    #remove the finished source
-                    removeSource(request.cam)
-            except ValueError:
-                print('Invalid camera name: {}'.format(request.cam))
-        elif request.__class__.__name__ is 'Post':
-            #need to unpickle the image
-            #print "Got compressed img: ", request.compressedImg
-            compressedImg = request.compressedImg
-            #print "GOT POST IMG: ", compressedImg, "GOT POST"
-            #decompress image
-            img = cv2.imdecode(compressedImg, 1)
-            if request.name in sources:
-                sources[request.name].updateFrame(img)
-            else:
-                newSource = StillSource(request.name, img)
-                addSource(newSource)
-        elif request.__class__.__name__ is 'GetSources':
-            mailBox.send(sources.keys(), addr)
-        elif request.__class__.__name__ is 'StartCams':
-            startCams()
-        elif request.__class__.__name__ is 'SwapCams':
-            swapCams()
+        commands[request.__class__.__name__](request)
 
 
 
@@ -134,3 +158,7 @@ def getSource(streamName):
         raise ValueError("Invalid Stream Name: " + streamName)
     else:
         return sources[streamName]
+
+def exit():
+    print "SRV killed!"
+    pass
