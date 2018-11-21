@@ -15,6 +15,37 @@ In order to optimize the code, some is being rewritten in c++.
 ## Building
 Building this code requires [conan](https://github.com/conan-io/conan), cmake,
 make, and a recent c++ compiler. (GCC 4.8 and Clang 7, both available in ubuntu 18.10, should work.)
+
+### Getting a compiler
+If you arent using ubuntu 18, you'll need to add a recent compiler version,
+as ubuntu 16 ships a very old compiler. Here's how you can do that. Go to a shell
+and enter
+
+```bash
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+```
+
+Then, depending on your version, type
+
+```bash
+sudo apt-add-repository "deb http://apt.llvm.org/<version>/ llvm-toolchain-<version>-6.0 main"
+sudo apt-get update
+sudo apt-get install -y clang-6.0
+```
+
+Matching the name of your version against the list in 
+[LLVM Debian/Ubuntu nightly packages](https://apt.llvm.org/)
+under the ubuntu section. For instance, if you are using ubuntu 16, you should
+put `xenial` where `<version>` is in the above example.
+
+then, to use these compilers by default, run
+```bash
+echo "export CXX=/usr/bin/clang++" >> ~/.bashrc
+echo "export CC=/usr/bin/clang" >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Building the code
 To build this code, go to the source directory and type
 
 ```bash
