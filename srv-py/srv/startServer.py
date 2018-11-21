@@ -1,12 +1,20 @@
+"""
+Executed to start the server.
+If the server is killed or crashes, clients are notified.
+"""
 import server
+import traceback
 
-server.run()
-
+"""
+Run the server normally. If an exception, error, or signal occurs, clean up the server.
+"""
 try:
   server.run()
 except BaseException as e:
+  #only print out error messages
+  if e.__class__.__name__ != 'KeyboardInterrupt':
+    print traceback.format_exc()
+
   #if any error happens, make the server call its exit function then die
-  server.exit()
-  #should be extended for signal interrupt too
-  #need to let clients know it died
-  #connection can throw an exception once it gets a message seerver has died
+  server.cleanUp()
+  raise e

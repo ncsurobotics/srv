@@ -6,47 +6,48 @@ from source import Source, StillSource
 import net_commands
 from StreamFinishedException import StreamFinishedException
 import os
+import img_compression
 
+"""
+SRV data structures:
 
-SERVER_STARTED = False
+-sources
+-commands
+-clients
+"""
 
-"""Video sources on the server."""
+"""Video sources on the server. These are either video streams or pictures that connections request."""
 sources = {}
 
-"""Commands executed by the server."""
+"""Commands executed by the server. All commands are in net_commands."""
 commands = {}
 
+"""Client connections to the server. Set of ip and port addresses of client connections."""
+clients = set()
+
+"""
+Adds a source to SRV's sources.
+"""
 def addSource(source):
     sources[source.name] = source
     print "Added source:", source.name
     print "Sources: ", sources.keys()
 
+"""
+Removes a source (given the name) from SRV's sources.
+"""
 def removeSource(name):
     sources[name].kill()
     del sources[name]
     print "Removed source:", name
     print "Sources: ", sources.keys()
 
+"""
+Empties the sources on SRV.
+"""
 def clearSources():
     source = {}
 
-def startFeed():
-    #addSource(Source("/home/ben/Videos/fast.mp4"))
-    pass
-
-#fix to eventually just kill old cams, then start cams with inverted 0 and 1
-#TODO grand architecture rewrite: instead of command names, send commands as
-#funcs and params
-
-
-def compressFrame(sourceName):
-    if sourceName in sources:
-        img = sources[sourceName].getNextFrame()
-        #compress at 80% quality
-        result, encodedImg = cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
-        return encodedImg
-    else:
-        raise ValueError('Unknown source')
 
 """
 SRV COMMANDS
@@ -54,15 +55,41 @@ SRV COMMANDS
 These are the commands executed by the server. Clients send the function name
 and arguments, the server looks them up in the commands dictionary and executes
 them.
+
+When the server executes a command, it may need the request or address information.
+For this reason, all commands have a request and address parameter.
 """
 
-"""Dictionary of commands that are executed by client functions."""
+"""
+Add a client to SRV's client list.
+"""
+def connect(request, addr):
+    clients.add(addr)
 
-def killServer(request):
+"""
+Remove a client from SRV's client list.
+"""
+def disconnect(request, addr):
+    clients.remove(addr)
+
+"""
+Clean up function called when the server crashes or is killed.
+Tells all clients the server died. Frees all sources as well.
+Once everything is clean, the program exits.
+"""
+def cleanUp(request=None, addr=None):
+    print '\n', "SRV killed!"
+    for clientAddr in clients:
+        print "Telling client", clientAddr, "to die"
+        mailBox.send(net_commands.ServerKilled(), clientAddr)
     for name in sources:
         sources[name].cap.release()
+    exit()
 
-def sendImage(request):
+"""
+Sends an image from a requested source to the client address.
+"""
+def sendImage(request, addr):
     outgoing_ip_port = addr
     try:
         if not (request.cam in sources):
@@ -71,7 +98,7 @@ def sendImage(request):
             print "Possible sources are: ", sources.keys()
             mailBox.send(net_commands.UnknownSource(), addr)
         try:
-            data = compressFrame(request.cam)
+            data = img_compression.compress(sources[request.cam].getNextFrame())
             mailBox.send(data, addr)
         except StreamFinishedException:
             #tell the client that the video file has finished
@@ -82,7 +109,10 @@ def sendImage(request):
     except ValueError:
         print('Invalid camera name: {}'.format(request.cam))
 
-def postImage(request):
+"""
+Posts an image to an SRV source. Updates the source's current frame.
+"""
+def postImage(request, addr):
     compressedImg = request.compressedImg
     #decompress image
     img = cv2.imdecode(compressedImg, 1)
@@ -92,36 +122,39 @@ def postImage(request):
         newSource = StillSource(request.name, img)
         addSource(newSource)
 
-#get sources
-def sendSources(request=None):
+"""
+Gets the server's sources and send them out.
+"""
+def sendSources(request, addr):
     mailBox.send(sources.keys(), addr)
 
-def startCams(request=None):
+"""
+Starts up camera sources.
+"""
+def startCams(request, addr):
     print "Started cams"
-    pass
     addSource(Source("down", 0))
     #TODO uncomment this line when using computer with 2 web cams
     
     addSource(Source("front", 1))
-    addSource(Source("/home/ben/Videos/buoy1.avi"))
-    addSource(Source("/home/ben/Videos/croppedDice"))
-    addSource(Source("/home/ben/Videos/croppedDice2"))
-    addSource(Source("/home/ben/Videos/diceReal.avi"))
-    addSource(Source("/home/ben/Videos/down0.mp4"))
-    addSource(Source("/home/ben/Videos/down_crash.avi"))
-    addSource(Source("/home/ben/Videos/DownFalse.avi"))
-    addSource(Source("/home/ben/Videos/pathC1.mp4"))
     print "Sources: ", sources.keys()
 
-def swapCams(request=None):
+"""
+Swaps the front and down cameras.
+"""
+def swapCams(request, addr):
     oldDown = sources["down"]
     sources["down"] = sources["forward"]
     sources["down"].name = "down"
     sources["forward"] = oldDown
     sources["forward"].name = "forward"
+ 
 
+"""Dictionary of commands that are executed by client functions."""
 commands = {
-    'Kill'        : killServer,
+    'Connect'     : connect,
+    'Disconnect'  : disconnect,
+    'Kill'        : cleanUp,
     'Image'       : sendImage,
     'Post'        : postImage,
     'GetSources'  : sendSources,
@@ -133,32 +166,22 @@ commands = {
 END OF SRV COMMANDS
 """
 
+"""
+Main function of the server. This function infinitely loops listening for client
+requests to its mailbox. When it gets one, it executes it.
+"""
 def run():
     print "SRV has begun, Process Id:", os.getpid()
-    SERVER_STARTED = True
 
     clearSources()
 
     # Set up the socket for receiving requests
-    global mailBox, addr
+    global mailBox
     mailBox = MailBox(ip_and_port=SVR_ADDRESS)
 
-    #start up the cam sources
-    #startCams()
-    #startFeed()
-
+    #loop and listen for client requests. Then grant them
     while True:
+        #listen for command
         request, addr = mailBox.receive()
-        commands[request.__class__.__name__](request)
-
-
-
-def getSource(streamName):
-    if not streamName in sources:
-        raise ValueError("Invalid Stream Name: " + streamName)
-    else:
-        return sources[streamName]
-
-def exit():
-    print "SRV killed!"
-    pass
+        #execute command
+        commands[request.__class__.__name__](request, addr)

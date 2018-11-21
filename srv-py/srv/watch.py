@@ -1,22 +1,32 @@
+"""
+Watch some or all SRV video streams.
+"""
 import srv
 import cv2
 import connection
 from StreamFinishedException import StreamFinishedException
 import sys
 
+"""
+Connection and function to get sources from SRV.
+"""
+sourcesConnection = connection.Connection("get sources")
 def getSources():
-  c = connection.Connection("get sources")
-  sources = c.getSources()
+  sources = sourcesConnection.getSources()
   return sources
 
+"""
+Forever loop and play SRV streams.
+"""
 def run(sources):
   connections = []
   for sourceName in sources:
     cv2.namedWindow(sourceName, cv2.WINDOW_NORMAL)
     connections.append(connection.Connection(sourceName))
   while True:
-    #if len(sources) == 0:
-    #  break
+    #if the system argument just wanted to watch all videos, constantly update sources
+    #TODO fix this so that it blocks when there are no sources
+    #TODO fix this so that the server notifies it when sources are added and removed
     if len(sys.argv) == 1:
       sources = getSources()
     for i in range(len(sources)):
@@ -40,12 +50,20 @@ def run(sources):
   for sourceName in sources:
     cv2.destroyWindow(sourceName)
 
+"""
+Print out help messages.
+"""
 def help():
   print "To play specific sources:"
   print "\tusage: python watch.py source_1 source_2 ..."
   print "(indefinite amount of listed sources to be played)"
   print "To play all sources:"
   print "\tusage: python watch.py"
+
+"""
+Parse command line arguments and start playing windows.
+The main function area.
+"""
 
 srvSources = getSources()
 
