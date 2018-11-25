@@ -49,10 +49,9 @@ source ~/.bashrc
 To build this code, go to the source directory and type
 
 ```bash
-conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan
 mkdir build
 cd build
-conan install .. --build boost --build opencv -s cppstd=11
+conan install ..
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 cd ..
 # The file `compile_commands.json` is optional and only useful if you are using an IDE.
@@ -69,7 +68,7 @@ the executable `srv` at `build/srv`.
 To edit the code, either [cquery](https://github.com/cquery-project/cquery.git) 
 (more stable) or [ccls](https://github.com/MaskRay/ccls.git) (faster) are reccommended,
 which can both be used with emacs, vscode, or neovim. Because we use cmake, code blocks
-should work as well.
+and clion should work as well.
 
 You should use [cpplint](https://github.com/cpplint/cpplint.git) and
 [scan build](https://clang-analyzer.llvm.org/scan-build.html) to make sure

@@ -14,6 +14,9 @@ using std::string;
 
 class Source {
  public:
+  // Default constructor.
+  // Do not use.
+  Source();
   // Constructor
   Source(string name, VideoCapture capture);
   // Also constructor
@@ -28,7 +31,5 @@ class Source {
   VideoCapture capture;
 };
 
-
-// typedef istream_iterator<Mat> Source;
 
 #endif  // INCLUDE_MAIN_CPP_SOURCE_HPP_
