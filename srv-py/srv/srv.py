@@ -7,6 +7,8 @@ import time
 
 srvp = None
 
+#TODO remove connect, playdown, and kill as they are deprecated. Everything here deprecated except stream.
+
 def connect():
   srvp = os.system('python /usr/local/lib/python2.7/dist-packages/srv/server.py run &')
   #srvp = os.spawnl(os.P_WAIT, 'python /usr/local/lib/python2.7/dist-packages/srv/server.py run')

@@ -1,3 +1,11 @@
+"""The command that connects a client."""
+class Connect(object):
+    dummy = []
+
+"""The command that disconnects a client."""
+class Disconnect(object):
+    dummy = []
+
 """The command that kills the server."""
 class Kill(object):
     """Dummy variable. This object carries no extra data."""
@@ -40,4 +48,8 @@ class StartCams(object):
 
 """Request to swap down and front cameras"""
 class SwapCams(object):
+    dummy = []
+
+"""Lets client connections know when the server has been killed."""
+class ServerKilled(object):
     dummy = []
