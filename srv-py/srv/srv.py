@@ -9,6 +9,7 @@ import startServer
 import startCams
 import watch as watchStreams
 import swapCams
+import record as recordStream
 
 
 """
@@ -25,6 +26,12 @@ def watch():
 
 def swap():
   swapCams.main()
+
+#TODO add in ability to record multiple streams
+def record(stream, out_file):
+  recordStream.main(stream, out_file)
+
+
 
 
 """
