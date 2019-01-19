@@ -1,10 +1,11 @@
 [requires]
 boost/1.68.0@conan/stable
-opencv/3.4.2@bincrafters/stable 
+opencv/3.4.3@conan/stable 
 
 [generators]
 cmake
 
 [options]
-libcurl:with_openssl=True
+boost:shared=True
 opencv:shared=True
+opencv:fPIC=True

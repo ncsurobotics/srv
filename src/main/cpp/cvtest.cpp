@@ -3,8 +3,8 @@
  */
 
 #include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
 
 auto main(int argc, char** argv) -> int {
   if (argc != 2) {
