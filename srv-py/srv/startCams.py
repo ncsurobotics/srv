@@ -1,4 +1,9 @@
 import srv
 import connection
 
-connection.Connection("StartCams")
+def main():
+  connection.Connection("StartCams")
+
+
+if __name__ == "__main__":
+  main()

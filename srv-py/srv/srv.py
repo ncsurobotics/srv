@@ -5,6 +5,31 @@ import subprocess
 import os
 import time
 
+import startServer
+import startCams
+import watch as watchStreams
+import swapCams
+
+
+"""
+SRV commands to start server, start cams, watch streams, and swapping cams.
+"""
+def server():
+  startServer.main()
+
+def cams():
+  startCams.main()
+
+def watch():
+  watchStreams.main()
+
+def swap():
+  swapCams.main()
+
+
+"""
+Commands that are probably deprecated, need to remove if never called.
+"""
 srvp = None
 
 #TODO remove connect, playdown, and kill as they are deprecated. Everything here deprecated except stream.

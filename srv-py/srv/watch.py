@@ -7,18 +7,15 @@ import connection
 from StreamFinishedException import StreamFinishedException
 import sys
 
-"""
-Connection and function to get sources from SRV.
-"""
-sourcesConnection = connection.Connection("get sources")
-def getSources():
+
+def getSources(sourcesConnection):
   sources = sourcesConnection.getSources()
   return sources
 
 """
 Forever loop and play SRV streams.
 """
-def run(sources):
+def run(sources, sourcesConnection, srvSources):
   connections = []
   for sourceName in sources:
     cv2.namedWindow(sourceName, cv2.WINDOW_NORMAL)
@@ -28,14 +25,14 @@ def run(sources):
     #TODO fix this so that it blocks when there are no sources
     #TODO fix this so that the server notifies it when sources are added and removed
     if len(sys.argv) == 1:
-      sources = getSources()
+      sources = getSources(sourcesConnection)
     for i in range(len(sources)):
       if sources[i] not in srvSources:
         connections.pop(i)
         src = sources.pop(i)
         cv2.destroyWindow(src)
         print "Error:", src, "not in SRV Sources"
-        print "SRV Sources:", getSources()
+        print "SRV Sources:", getSources(sourcesConnection)
         break
       try:
         cv2.imshow(sources[i], connections[i].getNextFrame())
@@ -60,25 +57,34 @@ def help():
   print "To play all sources:"
   print "\tusage: python watch.py"
 
-"""
-Parse command line arguments and start playing windows.
-The main function area.
-"""
+def main():
+  """
+  Connection and function to get sources from SRV.
+  """
+  sourcesConnection = connection.Connection("get sources")
 
-srvSources = getSources()
+  """
+  Parse command line arguments and start playing windows.
+  The main function area.
+  """
 
-if len(sys.argv) == 1:
-  sources = getSources()
-elif len(sys.argv) == 2:
-  if sys.argv[1].lower() == "help":
-    help()
+  srvSources = getSources(sourcesConnection)
+
+  if len(sys.argv) == 1:
+    sources = getSources(sourcesConnection)
+  elif len(sys.argv) == 2:
+    if sys.argv[1].lower() == "help":
+      help()
+    else:
+      #just 1 source
+      sources = [sys.argv[1]]
   else:
-    #just 1 source
-    sources = [sys.argv[1]]
-else:
-  #each command line argument is a source name
-  sources = []
-  for i in range(1,len(sys.argv)):
-    sources.append(sys.argv[i])
+    #each command line argument is a source name
+    sources = []
+    for i in range(1,len(sys.argv)):
+      sources.append(sys.argv[i])
 
-run(sources)
+  run(sources, sourcesConnection, srvSources)
+
+if __name__ == "__main__":
+  main()
