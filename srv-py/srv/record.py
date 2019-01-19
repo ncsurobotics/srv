@@ -12,7 +12,6 @@ import socket
 
 def saveAndQuit():
   print "Finishing recording"
-  print out
   out.release()
   cv2.destroyAllWindows()
   c.close()
@@ -24,7 +23,7 @@ def signal_handler(sig, args):
 
 out = None
 
-def main(cameraName, outFile):
+def main(cameraName, outFile, show_feed=False):
   global out, c
   
 
@@ -52,9 +51,10 @@ def main(cameraName, outFile):
     except:
       exit(0)
     out.write(frame)
-    cv2.imshow('frame',frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-      break
+    if show_feed:
+      cv2.imshow('frame',frame)
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
   saveAndQuit()
 
 if __name__ == "__main__":

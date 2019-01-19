@@ -28,8 +28,8 @@ def swap():
   swapCams.main()
 
 #TODO add in ability to record multiple streams
-def record(stream, out_file):
-  recordStream.main(stream, out_file)
+def record(stream, out_file, show_feed=False):
+  recordStream.main(stream, out_file, show_feed)
 
 
 
