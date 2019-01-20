@@ -15,6 +15,8 @@ def saveAndQuit():
   out.release()
   cv2.destroyAllWindows()
   c.close()
+  # reset keep_recording variable
+  keep_recording = True
   sys.exit(0)
 
 #when hit ctrl-c, save the video and exit
@@ -22,9 +24,14 @@ def signal_handler(sig, args):
   saveAndQuit()
 
 out = None
+keep_recording = True
+
+def stop_recording():
+  global keep_recording
+  keep_recording = False
 
 def main(cameraName, outFile, show_feed=False):
-  global out, c
+  global out, c, keep_recording
   
 
   #maybe make this not a constant in future version
@@ -34,9 +41,7 @@ def main(cameraName, outFile, show_feed=False):
   #connect to the video feed
   c = Connection(cameraName)
 
-  print "Begun recording", cameraName, ". Hit ctrl-c to finish recording."
-
-  signal.signal(signal.SIGINT, signal_handler)
+  print "Begun recording", cameraName
 
   #get dim of the video being recorded by looking at a frame's size
   height, width, _ = c.getNextFrame().shape
@@ -45,7 +50,7 @@ def main(cameraName, outFile, show_feed=False):
   fourcc = cv2.cv.CV_FOURCC(*'MJPG')
   out = cv2.VideoWriter(outFile + '.avi', fourcc, frameRate, (width, height))
 
-  while(True):
+  while(keep_recording):
     try:
       frame = c.getNextFrame()
     except:
@@ -64,4 +69,8 @@ if __name__ == "__main__":
 
   cameraName = sys.argv[1]
   outFile = sys.argv[2]
+
+  print ". Hit ctrl-c to finish recording."
+  signal.signal(signal.SIGINT, signal_handler)
+
   main(cameraName, outFile)

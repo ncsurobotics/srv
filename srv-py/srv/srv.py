@@ -31,7 +31,8 @@ def swap():
 def record(stream, out_file, show_feed=False):
   recordStream.main(stream, out_file, show_feed)
 
-
+def stop_recording():
+  recordStream.stop_recording()
 
 
 """
