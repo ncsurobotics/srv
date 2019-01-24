@@ -5,6 +5,7 @@ import cv2
 import img_compression as ic
 import pickle
 from StreamFinishedException import StreamFinishedException
+import socket
 """
 Connection stream to SRV server. Can stream from the connection. Basically a client object.
 
