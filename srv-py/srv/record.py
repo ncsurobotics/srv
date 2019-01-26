@@ -9,6 +9,7 @@ import signal
 import cv2
 from connection import Connection
 import socket
+import os
 
 def saveAndQuit():
   print "Finishing recording"
@@ -30,8 +31,12 @@ def stop_recording():
   global keep_recording
   keep_recording = False
 
-def main(cameraName, outFile, show_feed=False):
+def main(cameraName, outFile, parent_queue=None, show_feed=False):
   global out, c, keep_recording
+
+  if parent_queue != None:
+    pid = os.getpid()
+    parent_queue.put(pid)
   
 
   #maybe make this not a constant in future version

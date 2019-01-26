@@ -30,6 +30,9 @@ class WindowRecord(object):
     self.lastTimeKilled = lastTimeKilled
     self.responseQueue = responseQueue
 
+def commonWindowQueue():
+  return WindowRecord.commonQueue
+
 """
 Function that returns the same instance of a dictionary,
 used as a global variable of the dictionary of windows
@@ -42,7 +45,7 @@ def windows(windows={}):
 Function run by process.
 
 Displays the images from the image queue in order. Will close window after
-images stop coming for 2 seconds.
+images stop coming for 6 seconds.
 """
 def winProc(name, images, alive, lastTimeKilled, responseQueue):
   try:
@@ -53,13 +56,13 @@ def winProc(name, images, alive, lastTimeKilled, responseQueue):
     while True:
       try:
         #print "I am getting the frame"
-        frame = images.get(timeout=2)
+        frame = images.get(timeout=6)
         #print "I got the frame"
       except Exception as e:
-        #print "FINISHED"
+        print "Finished window", name
         break
       if frame.__class__.__name__ == 'NoneType':
-        #print "THe frame was none"
+        print "Finished window", name
         break
       #print "About to show the frame"
       cv2.imshow(name, frame)
