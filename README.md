@@ -2,6 +2,19 @@
 Seawolf Router for Video (SRV)
 ==============================
 
+
+INSTALLATION:
+Make sure you are on the daemonSrv branch.
+
+Go into the srv/srv-py directory and run:
+
+    $ sudo pip install -e .
+
+To test srv python import:
+
+    $ python
+    >>> import srv
+
 The SRV library is a replacement for SVR ~~written entirely
 in python.~~ The goal was to simplify the code used for
 Seawolf's video streaming.
