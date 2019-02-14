@@ -9,6 +9,8 @@ Make sure you are on the daemonSrv branch.
 Go into the srv/srv-py directory and run:
 
     $ sudo pip install -e .
+    If this doesn't work, run:
+    $ sudo python -m pip install -e .
 
 To test srv python import:
 
